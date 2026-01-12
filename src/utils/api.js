@@ -3,8 +3,9 @@ import axios from "axios";
 
 // Axios instance
 const API = axios.create({
-  baseURL:  import.meta.env.VITE_API_BASE_URL ,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
+console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL); // Add this
 
 // Request interceptor - token attach karega
 API.interceptors.request.use(
