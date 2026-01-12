@@ -64,7 +64,6 @@ export default function ManageUsers() {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = "http://localhost:5001/api/users/add";
 
       // Prepare data based on role
       const userData = {
@@ -83,8 +82,10 @@ export default function ManageUsers() {
         userData.warehouse = newUser.warehouse;
       }
 
-      await axios.post(endpoint, userData, {
-        headers: { Authorization: `Bearer ${adminToken}` }  // ✅ Token add
+      await API.post("/api/users/add", userData, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
       });
       alert(`✅ ${newUser.role === "DO" ? "Distribution Officer" : "Warehouse Manager"} added successfully!`);
       setShowAddModal(false);
