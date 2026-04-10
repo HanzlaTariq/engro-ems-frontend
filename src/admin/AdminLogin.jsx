@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AdminAuthContext } from "./context/AdminAuthContext";
 import API from "../utils/api.js";
