@@ -9,10 +9,7 @@ export function AdminAuthProvider({ children }) {
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminData");
     const savedToken = localStorage.getItem("adminToken");
-    console.log(
-      "🔍 Loading admin from localStorage - Token:",
-      savedToken ? "Present" : "Missing",
-    ); // Temp log
+    
 
     if (savedAdmin) {
       setAdmin(JSON.parse(savedAdmin));
