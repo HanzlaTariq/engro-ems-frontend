@@ -61,7 +61,7 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
         {
             path: "/quarterly-spot-check",
             name: "Quarterly spot check",
-            icon: " fa-clipboard-check",
+            icon: "fa-clipboard-check",
             description: "Quarterly spot check"
         },
          {
@@ -417,10 +417,6 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
                     </div>
                 )}
             </div>
-
-            {/* Add Font Awesome for icons */}
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
             {/* Custom scrollbar styling */}
             <style>
                 {`
