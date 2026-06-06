@@ -3,6 +3,21 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import API from "../utils/api";
+import {
+  FaBolt,
+  FaCalendarCheck,
+  FaCalendarDays,
+  FaCalendarXmark,
+  FaClipboardCheck,
+  FaCircleExclamation,
+  FaCircleInfo,
+  FaFileLines,
+  FaHelmetSafety,
+  FaBoxOpen,
+  FaTruck,
+  FaTriangleExclamation,
+  FaUserCheck,
+} from "react-icons/fa6";
 
 export default function Dashboard() {
   const { user, logout } = useContext(AuthContext);
@@ -394,16 +409,22 @@ export default function Dashboard() {
   };
 
   const quickActions = [
-    { title: "Attendance List", icon: "fa-user-check", color: engroColors.primary, route: "/attendance-list", description: "Manage attendance" },
-    { title: "Safety Talk (Labours)", icon: "fa-hard-hat", color: engroColors.secondary, route: "/safety-talk-list", description: "Safety briefings" },
-    { title: "Safety Talk (Truckers)", icon: "fa-truck", color: engroColors.info, route: "/safety-talk-trucker-list", description: "Trucker safety" },
-    { title: "Weekly Spot Check", icon: "fa-clipboard-check", color: engroColors.success, route: "/weekly-spot-check-list", description: "Weekly audits" },
-    { title: "Quarterly Spot Check", icon: "fa-calendar-alt", color: engroColors.warning, route: "/quarterly-spot-check-list", description: "Quarterly audits" },
-    { title: "Empty Bag Record", icon: "fa-box-open", color: engroColors.danger, route: "/empty-bag-list", description: "Inventory management" },
-    { title: "Pre-numbered Stationary", icon: "fa-file-alt", color: "#8b5cf6", route: "/pre-number-stationary-record-list", description: "Document control" },
+    { title: "Attendance List", icon: FaUserCheck, color: engroColors.primary, route: "/attendance-list", description: "Manage attendance" },
+    { title: "Safety Talk (Labours)", icon: FaHelmetSafety, color: engroColors.secondary, route: "/safety-talk-list", description: "Safety briefings" },
+    { title: "Safety Talk (Truckers)", icon: FaTruck, color: engroColors.info, route: "/safety-talk-trucker-list", description: "Trucker safety" },
+    { title: "Weekly Spot Check", icon: FaClipboardCheck, color: engroColors.success, route: "/weekly-spot-check-list", description: "Weekly audits" },
+    { title: "Quarterly Spot Check", icon: FaCalendarDays, color: engroColors.warning, route: "/quarterly-spot-check-list", description: "Quarterly audits" },
+    { title: "Empty Bag Record", icon: FaBoxOpen, color: engroColors.danger, route: "/empty-bag-list", description: "Inventory management" },
+    { title: "Pre-numbered Stationary", icon: FaFileLines, color: "#8b5cf6", route: "/pre-number-stationary-record-list", description: "Document control" },
   ];
 
-  const StatCard = ({ title, value, subtitle, icon, color, secondaryValue, onClick }) => (
+  const statusIconMap = {
+    high: FaTriangleExclamation,
+    medium: FaCircleExclamation,
+    low: FaCircleInfo,
+  };
+
+  const StatCard = ({ title, value, subtitle, icon: Icon, color, secondaryValue, onClick }) => (
     <div 
       className="stat-card" 
       style={{
@@ -432,8 +453,8 @@ export default function Dashboard() {
         <h3 style={{ margin: "0", color: engroColors.neutral, fontSize: "14px", fontWeight: "500", textTransform: "uppercase" }}>
           {title}
         </h3>
-        <div style={{ width: "40px", height: "40px", borderRadius: "8px", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", color: color }}>
-          <i className={`fas ${icon}`}></i>
+        <div style={{ width: "40px", height: "40px", borderRadius: "8px", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", color: color, fontSize: "18px" }}>
+          <Icon />
         </div>
       </div>
       <p style={{ margin: "0", fontSize: "32px", fontWeight: "700", color: engroColors.dark, lineHeight: "1.2" }}>
@@ -477,7 +498,10 @@ export default function Dashboard() {
       onClick={() => navigate(action.route)}
     >
       <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: action.color, display: "flex", alignItems: "center", justifyContent: "center", color: "white", marginBottom: "12px", fontSize: "20px" }}>
-        <i className={`fas ${action.icon}`}></i>
+        {(() => {
+          const ActionIcon = action.icon;
+          return <ActionIcon />;
+        })()}
       </div>
       <span style={{ fontWeight: "600", color: "inherit", fontSize: "14px", textAlign: "center", marginBottom: "4px" }}>
         {action.title}
@@ -565,11 +589,7 @@ export default function Dashboard() {
                   color: "white",
                   fontSize: "18px",
                 }}>
-                  <i className={
-                    spotCheckAlert.severity === "high" ? "fas fa-exclamation-triangle" :
-                    spotCheckAlert.severity === "medium" ? "fas fa-exclamation-circle" :
-                    "fas fa-info-circle"
-                  }></i>
+                  {React.createElement(statusIconMap[spotCheckAlert.severity] || FaCircleInfo)}
                 </div>
                 <div>
                   <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
@@ -621,11 +641,7 @@ export default function Dashboard() {
                   color: "white",
                   fontSize: "18px",
                 }}>
-                  <i className={
-                    quarterlySpotCheckAlert.severity === "high" ? "fas fa-calendar-exclamation" :
-                    quarterlySpotCheckAlert.severity === "medium" ? "fas fa-calendar-check" :
-                    "fas fa-calendar-alt"
-                  }></i>
+                  {quarterlySpotCheckAlert.severity === "high" ? <FaCalendarXmark /> : quarterlySpotCheckAlert.severity === "medium" ? <FaCalendarCheck /> : <FaCalendarDays />}
                 </div>
                 <div>
                   <h3 style={{ margin: "0 0 4px 0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
@@ -698,7 +714,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div style={{ backgroundColor: engroColors.white, borderRadius: "12px", padding: "24px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", marginBottom: "32px" }}>
           <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", color: engroColors.dark, display: "flex", alignItems: "center", gap: "10px" }}>
-            <i className="fas fa-bolt" style={{ color: engroColors.primary }}></i> Quick Actions
+            <FaBolt style={{ color: engroColors.primary }} /> Quick Actions
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
             {quickActions.map((action, index) => (
@@ -713,7 +729,7 @@ export default function Dashboard() {
           {dashboardData.latestSpotCheckRecord && (
             <div style={{ backgroundColor: engroColors.white, borderRadius: "12px", padding: "24px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}>
               <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", color: engroColors.dark, display: "flex", alignItems: "center", gap: "10px" }}>
-                <i className="fas fa-clipboard-check" style={{ color: engroColors.primary }}></i> Latest Weekly Check
+                <FaClipboardCheck style={{ color: engroColors.primary }} /> Latest Weekly Check
               </h2>
               
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "20px" }}>
@@ -733,7 +749,7 @@ export default function Dashboard() {
               
               <div style={{ backgroundColor: engroColors.light, borderRadius: "8px", padding: "16px" }}>
                 <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
-                  <i className="fas fa-exclamation-circle" style={{ color: engroColors.warning, marginRight: "8px" }}></i>
+                  <FaCircleExclamation style={{ color: engroColors.warning, marginRight: "8px" }} />
                   Equipment Status
                 </h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
@@ -766,7 +782,7 @@ export default function Dashboard() {
           {dashboardData.latestQuarterlySpotCheckRecord && (
             <div style={{ backgroundColor: engroColors.white, borderRadius: "12px", padding: "24px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}>
               <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", color: engroColors.dark, display: "flex", alignItems: "center", gap: "10px" }}>
-                <i className="fas fa-calendar-alt" style={{ color: engroColors.warning }}></i> Latest Quarterly Check
+                <FaCalendarDays style={{ color: engroColors.warning }} /> Latest Quarterly Check
               </h2>
               
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "20px" }}>
@@ -786,7 +802,7 @@ export default function Dashboard() {
               
               <div style={{ backgroundColor: engroColors.light, borderRadius: "8px", padding: "16px" }}>
                 <h3 style={{ margin: "0 0 12px 0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
-                  <i className="fas fa-shield-alt" style={{ color: engroColors.success, marginRight: "8px" }}></i>
+                  <FaCircleExclamation style={{ color: engroColors.success, marginRight: "8px" }} />
                   Safety Equipment Status
                 </h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
@@ -819,14 +835,14 @@ export default function Dashboard() {
         {/* Today's Records */}
         <div style={{ backgroundColor: engroColors.white, borderRadius: "12px", padding: "24px", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)" }}>
           <h2 style={{ margin: "0 0 20px 0", fontSize: "20px", color: engroColors.dark, display: "flex", alignItems: "center", gap: "10px" }}>
-            <i className="fas fa-clipboard-list" style={{ color: engroColors.primary }}></i> Today's Records
+            <FaClipboardCheck style={{ color: engroColors.primary }} /> Today's Records
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
             {/* Empty Bag Records */}
             <div style={{ backgroundColor: engroColors.light, borderRadius: "10px", padding: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: `${engroColors.danger}15`, display: "flex", alignItems: "center", justifyContent: "center", color: engroColors.danger, fontSize: "18px", marginRight: "12px" }}>
-                  <i className="fas fa-box-open"></i>
+                  <FaBoxOpen />
                 </div>
                 <h3 style={{ margin: "0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
                   Empty Bag Records ({dashboardData.emptyBagTotalToday || 0})
@@ -854,7 +870,7 @@ export default function Dashboard() {
             <div style={{ backgroundColor: engroColors.light, borderRadius: "10px", padding: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: `#8b5cf615`, display: "flex", alignItems: "center", justifyContent: "center", color: "#8b5cf6", fontSize: "18px", marginRight: "12px" }}>
-                  <i className="fas fa-file-alt"></i>
+                  <FaFileLines />
                 </div>
                 <h3 style={{ margin: "0", fontSize: "16px", color: engroColors.dark, fontWeight: "600" }}>
                   Pre-number Stationary ({dashboardData.preNumberTotalToday || 0})
@@ -882,7 +898,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     </div>
   );
 }

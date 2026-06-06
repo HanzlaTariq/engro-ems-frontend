@@ -1,6 +1,18 @@
 import React, { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import {
+    FaChevronLeft,
+    FaChevronRight,
+    FaGaugeHigh,
+    FaUserCheck,
+    FaHelmetSafety,
+    FaBoxOpen,
+    FaTruck,
+    FaClipboardCheck,
+    FaFileLines,
+    FaRightFromBracket,
+} from "react-icons/fa6";
 
 export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
     const { user } = useContext(AuthContext);
@@ -16,6 +28,16 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
         sidebarBg: "#1D3F36", // Dark Green for sidebar
         sidebarHover: "#2A5247", // Darker Green for hover
         white: "#FFFFFF"
+    };
+
+    const navIconMap = {
+        "fa-tachometer-alt": FaGaugeHigh,
+        "fa-user-check": FaUserCheck,
+        "fa-hard-hat": FaHelmetSafety,
+        "fa-box-open": FaBoxOpen,
+        "fa-truck-moving": FaTruck,
+        "fa-clipboard-check": FaClipboardCheck,
+        "fa-file-alt": FaFileLines,
     };
 
     // Navigation items
@@ -61,7 +83,7 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
         {
             path: "/quarterly-spot-check",
             name: "Quarterly spot check",
-            icon: " fa-clipboard-check",
+            icon: "fa-clipboard-check",
             description: "Quarterly spot check"
         },
          {
@@ -121,7 +143,7 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
                     e.target.style.transform = "scale(1)";
                 }}
             >
-                <i className={`fas ${isCollapsed ? "fa-chevron-right" : "fa-chevron-left"}`}></i>
+                {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
             </button>
 
             {/* Logo Section */}
@@ -324,7 +346,10 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
                                     justifyContent: "center",
                                     fontSize: "16px"
                                 }}>
-                                    <i className={`fas ${item.icon}`}></i>
+                                    {(() => {
+                                        const Icon = navIconMap[item.icon.trim()] || FaGaugeHigh;
+                                        return <Icon />;
+                                    })()}
                                 </div>
                                 {!isCollapsed && (
                                     <div style={{ flex: 1 }}>
@@ -391,7 +416,7 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    <i className="fas fa-sign-out-alt"></i>
+                    <FaRightFromBracket />
                     {!isCollapsed && "Logout"}
                 </button>
 
@@ -417,10 +442,6 @@ export default function Sidebar({ onLogout, isCollapsed, setIsCollapsed }) {
                     </div>
                 )}
             </div>
-
-            {/* Add Font Awesome for icons */}
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
             {/* Custom scrollbar styling */}
             <style>
                 {`
