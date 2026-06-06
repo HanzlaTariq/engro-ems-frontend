@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
 import { AdminAuthContext } from "./context/AdminAuthContext";
 import API from "../utils/api";
 
@@ -11,6 +10,7 @@ export default function ManageUsers() {
   const [error, setError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
   // New user form state
@@ -30,6 +30,18 @@ export default function ManageUsers() {
   const [assignment, setAssignment] = useState({
     userId: "",
     warehouseIds: []
+  });
+
+  const [editUser, setEditUser] = useState({
+    _id: "",
+    name: "",
+    email: "",
+    phone: "",
+    city: "",
+    province: "",
+    address: "",
+    role: "warehouse_manager",
+    warehouse: ""
   });
 
   // ✅ Fetch all users
@@ -121,6 +133,52 @@ export default function ManageUsers() {
     } catch (err) {
       console.error("❌ Failed to assign warehouses:", err);
       alert(err.response?.data?.msg || "Error assigning warehouses!");
+    }
+  };
+
+  const openEditModal = (user) => {
+    setSelectedUser(user);
+    setEditUser({
+      _id: user._id,
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      city: user.city || "",
+      province: user.province || "",
+      address: user.address || "",
+      role: user.role || "warehouse_manager",
+      warehouse: user.warehouse?._id || user.warehouse || ""
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        name: editUser.name,
+        email: editUser.email,
+        phone: editUser.phone,
+        city: editUser.city,
+        province: editUser.province,
+        address: editUser.address
+      };
+
+      if (editUser.role === "warehouse_manager") {
+        payload.warehouse = editUser.warehouse;
+      }
+
+      await API.put(`/api/users/${editUser._id}`, payload, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+
+      alert("✅ User updated successfully!");
+      setShowEditModal(false);
+      setSelectedUser(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("❌ Failed to update user:", err);
+      alert(err.response?.data?.message || err.response?.data?.msg || "Error updating user!");
     }
   };
 
@@ -270,6 +328,13 @@ export default function ManageUsers() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="py-2 px-4 border space-x-2">
+                      <button
+                        onClick={() => openEditModal(user)}
+                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition text-xs"
+                      >
+                        Update
+                      </button>
+
                       {/* Assign Warehouses Button - Only for DO */}
                       {user.role === "DO" && (
                         <button
@@ -459,6 +524,155 @@ export default function ManageUsers() {
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                 >
                   Add User
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Update User</h2>
+            <form onSubmit={handleUpdateUser}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Personal Information</h3>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editUser.name}
+                      onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={editUser.email}
+                      onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={editUser.phone}
+                      onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Role
+                    </label>
+                    <input
+                      type="text"
+                      value={editUser.role === "DO" ? "Distribution Officer" : "Warehouse Manager"}
+                      disabled
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Location & Assignment</h3>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Province
+                    </label>
+                    <select
+                      value={editUser.province}
+                      onChange={(e) => setEditUser({ ...editUser, province: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Province</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Sindh">Sindh</option>
+                      <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa</option>
+                      <option value="Balochistan">Balochistan</option>
+                      <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
+                      <option value="Azad Kashmir">Azad Kashmir</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={editUser.city}
+                      onChange={(e) => setEditUser({ ...editUser, city: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Address
+                    </label>
+                    <textarea
+                      value={editUser.address}
+                      onChange={(e) => setEditUser({ ...editUser, address: e.target.value })}
+                      rows="2"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {editUser.role === "warehouse_manager" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Assign Warehouse
+                      </label>
+                      <select
+                        value={editUser.warehouse}
+                        onChange={(e) => setEditUser({ ...editUser, warehouse: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Warehouse</option>
+                        {warehouses.map((warehouse) => (
+                          <option key={warehouse._id} value={warehouse._id}>
+                            {warehouse.name} - {warehouse.location}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 transition"
+                >
+                  Update User
                 </button>
               </div>
             </form>
