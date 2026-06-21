@@ -677,7 +677,7 @@ export default function Dashboard() {
             title="Today's Attendance"
             value={dashboardData.attendanceToday}
             subtitle={dashboardData.attendanceToday === "Present" ? `Time In: ${formatTime12(dashboardData.todayDetails?.timeIn)}` : "No attendance marked"}
-            icon="fa-user-check"
+            icon="FaUserCheck"
             color={dashboardData.attendanceToday === "Present" ? engroColors.primary : engroColors.danger}
           />
           
@@ -685,7 +685,7 @@ export default function Dashboard() {
             title="Safety Talks"
             value={dashboardData.safetyTalksToday}
             subtitle={dashboardData.todaySafetyTalks[0]?.topic || "No talks today"}
-            icon="fa-hard-hat"
+            icon="FaHelmetSafety"
             color={dashboardData.safetyTalksToday > 0 ? engroColors.secondary : engroColors.neutral}
             secondaryValue={`By: ${dashboardData.todaySafetyTalks[0]?.conductedBy || "N/A"}`}
           />
@@ -694,7 +694,7 @@ export default function Dashboard() {
             title="Weekly Spot Check"
             value={dashboardData.spotCheckStatus || "Pending"}
             subtitle={`Last: ${formatDate(dashboardData.lastSpotCheckDate) || "No record"}`}
-            icon="fa-clipboard-check"
+            icon="FaClipboardCheck"
             color={getConditionColor(dashboardData.spotCheckStatus)}
             secondaryValue={`Records: ${dashboardData.spotCheckTotalThisWeek || 0}`}
             onClick={() => navigate("/weekly-spot-check-list")}
@@ -704,7 +704,7 @@ export default function Dashboard() {
             title="Quarterly Spot Check"
             value={dashboardData.quarterlySpotCheckStatus || "Pending"}
             subtitle={`Last: ${formatDate(dashboardData.lastQuarterlySpotCheckDate) || "No record"}`}
-            icon="fa-calendar-alt"
+            icon="FaCalendarDays"
             color={getConditionColor(dashboardData.quarterlySpotCheckStatus)}
             secondaryValue={`Records: ${dashboardData.quarterlySpotCheckTotal || 0}`}
             onClick={() => navigate("/quarterly-spot-check-list")}
