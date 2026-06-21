@@ -410,7 +410,7 @@ export default function SafetyTalkTruckerList() {
     // Agar image already cached ho tab bhi trigger ho
     logo.complete && logo.onload();
 
-    setTimeout(() => document.body.removeChild(iframe), 1000);
+    // setTimeout(() => document.body.removeChild(iframe), 1000);
   };
 
   if (loading)
