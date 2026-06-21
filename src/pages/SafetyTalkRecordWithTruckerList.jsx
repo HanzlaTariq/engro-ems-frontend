@@ -2,13 +2,13 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import API from "../utils/api";
 import { useNavigate } from "react-router-dom";
-import { 
-  FiEdit, 
-  FiSave, 
-  FiX, 
-  FiPrinter, 
-  FiArrowLeft, 
-  FiSearch, 
+import {
+  FiEdit,
+  FiSave,
+  FiX,
+  FiPrinter,
+  FiArrowLeft,
+  FiSearch,
   FiFilter,
   FiDownload,
   FiEye,
@@ -16,7 +16,7 @@ import {
   FiCalendar,
   FiUser,
   FiTruck,
-  FiMessageSquare
+  FiMessageSquare,
 } from "react-icons/fi";
 
 const formatDate = (isoDate) => {
@@ -41,20 +41,23 @@ export default function SafetyTalkTruckerList() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState({ 
-    date: "", 
-    topic: "", 
+  const [filters, setFilters] = useState({
+    date: "",
+    topic: "",
     month: "",
     driverName: "",
     truckNo: "",
-    conductedBy: ""
+    conductedBy: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
   const [selectedRows, setSelectedRows] = useState(new Set());
   const [viewMode, setViewMode] = useState("table");
-  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "desc",
+  });
 
   // Advanced filtering with useMemo for performance
   const filteredData = useMemo(() => {
@@ -63,10 +66,10 @@ export default function SafetyTalkTruckerList() {
     // Global search
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(item =>
-        Object.values(item).some(val =>
-          String(val).toLowerCase().includes(term)
-        )
+      filtered = filtered.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(term),
+        ),
       );
     }
 
@@ -77,31 +80,31 @@ export default function SafetyTalkTruckerList() {
 
     if (filters.topic) {
       filtered = filtered.filter((i) =>
-        i.topic.toLowerCase().includes(filters.topic.toLowerCase())
+        i.topic.toLowerCase().includes(filters.topic.toLowerCase()),
       );
     }
 
     if (filters.month) {
       filtered = filtered.filter(
-        (i) => new Date(i.date).getMonth() + 1 === parseInt(filters.month)
+        (i) => new Date(i.date).getMonth() + 1 === parseInt(filters.month),
       );
     }
 
     if (filters.driverName) {
       filtered = filtered.filter((i) =>
-        i.driverName.toLowerCase().includes(filters.driverName.toLowerCase())
+        i.driverName.toLowerCase().includes(filters.driverName.toLowerCase()),
       );
     }
 
     if (filters.truckNo) {
       filtered = filtered.filter((i) =>
-        i.truckNo.toLowerCase().includes(filters.truckNo.toLowerCase())
+        i.truckNo.toLowerCase().includes(filters.truckNo.toLowerCase()),
       );
     }
 
     if (filters.conductedBy) {
       filtered = filtered.filter((i) =>
-        i.conductedBy.toLowerCase().includes(filters.conductedBy.toLowerCase())
+        i.conductedBy.toLowerCase().includes(filters.conductedBy.toLowerCase()),
       );
     }
 
@@ -122,29 +125,32 @@ export default function SafetyTalkTruckerList() {
   }, [records, filters, searchTerm, sortConfig]);
 
   const fetchRecords = useCallback(async () => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-    const res = await API.get("/api/safety-talk-trucker/my", {  // ✅ /my add kar
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setRecords(res.data.records);  // records array
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.message || "Failed to load trucker safety talks.");
-  } finally {
-    setLoading(false);
-  }
-}, []);
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await API.get("/api/safety-talk-trucker/my", {
+        // ✅ /my add kar
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRecords(res.data.records); // records array
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || "Failed to load trucker safety talks.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc"
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
@@ -154,7 +160,14 @@ export default function SafetyTalkTruckerList() {
   };
 
   const clearFilters = () => {
-    setFilters({ date: "", topic: "", month: "", driverName: "", truckNo: "", conductedBy: "" });
+    setFilters({
+      date: "",
+      topic: "",
+      month: "",
+      driverName: "",
+      truckNo: "",
+      conductedBy: "",
+    });
     setSearchTerm("");
   };
 
@@ -178,36 +191,34 @@ export default function SafetyTalkTruckerList() {
     setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleSave = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const saveData = {
-      ...editFormData,
-      date: new Date(editFormData.date).toISOString(),
-    };
-    const res = await API.put(
-      `/api/safety-talk-trucker/${editFormData._id}`,
-      saveData,
-      { headers: { Authorization: `Bearer ${token}` } }  // ✅ Header add
-    );
-    const updated = res.data.updated;
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const saveData = {
+        ...editFormData,
+        date: new Date(editFormData.date).toISOString(),
+      };
+      const res = await API.put(
+        `/api/safety-talk-trucker/${editFormData._id}`,
+        saveData,
+        { headers: { Authorization: `Bearer ${token}` } }, // ✅ Header add
+      );
+      const updated = res.data.updated;
 
-    setRecords((prev) =>
-      prev.map((i) => (i._id === updated._id ? updated : i))
-    );
+      setRecords((prev) =>
+        prev.map((i) => (i._id === updated._id ? updated : i)),
+      );
 
-    setEditingId(null);
-    setEditFormData({});
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.message || "Failed to save changes");
-  }
-};
-
-  
+      setEditingId(null);
+      setEditFormData({});
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to save changes");
+    }
+  };
 
   const handleRowSelect = (id) => {
-    setSelectedRows(prev => {
+    setSelectedRows((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -220,26 +231,37 @@ export default function SafetyTalkTruckerList() {
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(new Set(filteredData.map(item => item._id)));
+      setSelectedRows(new Set(filteredData.map((item) => item._id)));
     } else {
       setSelectedRows(new Set());
     }
   };
 
   const exportToCSV = () => {
-    const headers = ["No.", "Date", "Time", "Conducted By", "Truck No", "Driver Name", "Topic", "Remarks"];
+    const headers = [
+      "No.",
+      "Date",
+      "Time",
+      "Conducted By",
+      "Truck No",
+      "Driver Name",
+      "Topic",
+      "Remarks",
+    ];
     const csvContent = [
       headers.join(","),
-      ...filteredData.map((item, index) => [
-        index + 1,
-        formatDate(item.date),
-        formatTime12(item.time),
-        `"${item.conductedBy}"`,
-        `"${item.truckNo}"`,
-        `"${item.driverName}"`,
-        `"${item.topic}"`,
-        `"${item.remarks}"`
-      ].join(","))
+      ...filteredData.map((item, index) =>
+        [
+          index + 1,
+          formatDate(item.date),
+          formatTime12(item.time),
+          `"${item.conductedBy}"`,
+          `"${item.truckNo}"`,
+          `"${item.driverName}"`,
+          `"${item.topic}"`,
+          `"${item.remarks}"`,
+        ].join(","),
+      ),
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv" });
@@ -251,10 +273,10 @@ export default function SafetyTalkTruckerList() {
     window.URL.revokeObjectURL(url);
   };
 
- const handlePrint = () => {
+  const handlePrint = () => {
     const printContent = document.getElementById("printableArea").innerHTML;
     const originalContent = document.getElementById("mainContent").innerHTML;
-    
+
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
     iframe.style.width = "0";
@@ -373,24 +395,40 @@ export default function SafetyTalkTruckerList() {
     doc.close();
 
     iframe.contentWindow.focus();
-    iframe.contentWindow.print();
+    // iframe.contentWindow.print();
+    const logo = iframe.contentWindow.document.getElementById("printLogo");
+    logo.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    };
+
+    // Agar image already cached ho tab bhi trigger ho
+    logo.complete && logo.onload();
+
     setTimeout(() => document.body.removeChild(iframe), 1000);
   };
 
-  if (loading) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md">
-        <strong className="font-bold">Error: </strong>
-        <span className="block sm:inline">{error}</span>
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
-    </div>
-  );
+    );
+
+  if (error)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      </div>
+    );
 
   return (
     <div id="mainContent" className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -409,9 +447,11 @@ export default function SafetyTalkTruckerList() {
                 <p className="text-gray-600">Engro Fertilizers Limited</p>
               </div>
             </div>
-            <p className="text-gray-500 mt-1">Manage and monitor trucker safety discussions</p>
+            <p className="text-gray-500 mt-1">
+              Manage and monitor trucker safety discussions
+            </p>
           </div>
-          
+
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => navigate("/safety-talk-trucker")}
@@ -444,7 +484,9 @@ export default function SafetyTalkTruckerList() {
           <div className="flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Total Records</p>
-              <p className="text-2xl font-bold text-gray-800">{records.length}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {records.length}
+              </p>
             </div>
             <FiCalendar className="text-blue-500 text-2xl" />
           </div>
@@ -453,7 +495,9 @@ export default function SafetyTalkTruckerList() {
           <div className="flex justify-between items-center">
             <div>
               <p className="text-gray-500 text-sm">Filtered Records</p>
-              <p className="text-2xl font-bold text-gray-800">{filteredData.length}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {filteredData.length}
+              </p>
             </div>
             <FiFilter className="text-green-500 text-2xl" />
           </div>
@@ -463,7 +507,12 @@ export default function SafetyTalkTruckerList() {
             <div>
               <p className="text-gray-500 text-sm">This Month</p>
               <p className="text-2xl font-bold text-gray-800">
-                {records.filter(item => new Date(item.date).getMonth() === new Date().getMonth()).length}
+                {
+                  records.filter(
+                    (item) =>
+                      new Date(item.date).getMonth() === new Date().getMonth(),
+                  ).length
+                }
               </p>
             </div>
             <FiUser className="text-purple-500 text-2xl" />
@@ -506,7 +555,9 @@ export default function SafetyTalkTruckerList() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Global Search</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Global Search
+            </label>
             <div className="relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -518,9 +569,11 @@ export default function SafetyTalkTruckerList() {
               />
             </div>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Date
+            </label>
             <input
               type="date"
               name="date"
@@ -529,9 +582,11 @@ export default function SafetyTalkTruckerList() {
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Topic</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Topic
+            </label>
             <input
               type="text"
               name="topic"
@@ -541,9 +596,11 @@ export default function SafetyTalkTruckerList() {
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Month</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Month
+            </label>
             <select
               name="month"
               value={filters.month}
@@ -569,7 +626,9 @@ export default function SafetyTalkTruckerList() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Driver Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Driver Name
+            </label>
             <input
               type="text"
               name="driverName"
@@ -579,9 +638,11 @@ export default function SafetyTalkTruckerList() {
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Truck Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Truck Number
+            </label>
             <input
               type="text"
               name="truckNo"
@@ -591,9 +652,11 @@ export default function SafetyTalkTruckerList() {
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Conducted By</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Conducted By
+            </label>
             <input
               type="text"
               name="conductedBy"
@@ -609,24 +672,26 @@ export default function SafetyTalkTruckerList() {
       {/* View Mode Toggle */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">{filteredData.length} records found</span>
+          <span className="text-sm text-gray-600">
+            {filteredData.length} records found
+          </span>
           {selectedRows.size > 0 && (
             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
               {selectedRows.size} selected
             </span>
           )}
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode("table")}
-            className={`px-4 py-2 rounded-lg ${viewMode === "table" ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            className={`px-4 py-2 rounded-lg ${viewMode === "table" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
           >
             Table View
           </button>
           <button
             onClick={() => setViewMode("card")}
-            className={`px-4 py-2 rounded-lg ${viewMode === "card" ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            className={`px-4 py-2 rounded-lg ${viewMode === "card" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
           >
             Card View
           </button>
@@ -635,33 +700,39 @@ export default function SafetyTalkTruckerList() {
 
       {/* Table View */}
       {viewMode === "table" && (
-        <div id="printableArea" className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div
+          id="printableArea"
+          className="bg-white rounded-xl shadow-lg overflow-hidden"
+        >
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                 <tr>
-                  
                   <th className="px-4 py-4 text-left w-16">S.NO</th>
-                  <th 
+                  <th
                     className="px-4 py-4 text-left cursor-pointer hover:bg-blue-700 transition"
                     onClick={() => handleSort("date")}
                   >
                     <div className="flex items-center gap-2">
                       Date
                       {sortConfig.key === "date" && (
-                        <span>{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                        <span>
+                          {sortConfig.direction === "asc" ? "↑" : "↓"}
+                        </span>
                       )}
                     </div>
                   </th>
                   <th className="px-4 py-4 text-left">Time</th>
-                  <th 
+                  <th
                     className="px-4 py-4 text-left cursor-pointer hover:bg-blue-700 transition"
                     onClick={() => handleSort("conductedBy")}
                   >
                     <div className="flex items-center gap-2">
                       Conducted By
                       {sortConfig.key === "conductedBy" && (
-                        <span>{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                        <span>
+                          {sortConfig.direction === "asc" ? "↑" : "↓"}
+                        </span>
                       )}
                     </div>
                   </th>
@@ -675,80 +746,95 @@ export default function SafetyTalkTruckerList() {
               <tbody className="divide-y divide-gray-200">
                 {filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="px-4 py-8 text-center text-gray-500">
+                    <td
+                      colSpan="10"
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
                       <FiMessageSquare className="mx-auto text-4xl text-gray-300 mb-2" />
                       No records found matching your criteria
                     </td>
                   </tr>
                 ) : (
                   filteredData.map((item, index) => (
-                    <tr key={item._id} className={`hover:bg-blue-50 transition ${selectedRows.has(item._id) ? 'bg-blue-50' : ''}`}>
-                      
+                    <tr
+                      key={item._id}
+                      className={`hover:bg-blue-50 transition ${selectedRows.has(item._id) ? "bg-blue-50" : ""}`}
+                    >
                       <td className="px-4 py-3 font-medium text-gray-900 text-center">
                         {index + 1}
                       </td>
                       <td className="px-4 py-3 font-medium text-gray-900">
                         {editingId === item._id ? (
-                          <input 
-                            type="date" 
-                            name="date" 
-                            value={editFormData.date} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="date"
+                            name="date"
+                            value={editFormData.date}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
-                        ) : formatDate(item.date)}
+                        ) : (
+                          formatDate(item.date)
+                        )}
                       </td>
                       <td className="px-4 py-3 text-gray-600">
                         {editingId === item._id ? (
-                          <input 
-                            type="time" 
-                            name="time" 
-                            value={editFormData.time} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="time"
+                            name="time"
+                            value={editFormData.time}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
-                        ) : formatTime12(item.time)}
+                        ) : (
+                          formatTime12(item.time)
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {editingId === item._id ? (
-                          <input 
-                            type="text" 
-                            name="conductedBy" 
-                            value={editFormData.conductedBy} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="text"
+                            name="conductedBy"
+                            value={editFormData.conductedBy}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
-                        ) : item.conductedBy}
+                        ) : (
+                          item.conductedBy
+                        )}
                       </td>
                       <td className="px-4 py-3 font-mono text-gray-700">
                         {editingId === item._id ? (
-                          <input 
-                            type="text" 
-                            name="truckNo" 
-                            value={editFormData.truckNo} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="text"
+                            name="truckNo"
+                            value={editFormData.truckNo}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
-                        ) : item.truckNo}
+                        ) : (
+                          item.truckNo
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {editingId === item._id ? (
-                          <input 
-                            type="text" 
-                            name="driverName" 
-                            value={editFormData.driverName} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="text"
+                            name="driverName"
+                            value={editFormData.driverName}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
-                        ) : item.driverName}
+                        ) : (
+                          item.driverName
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {editingId === item._id ? (
-                          <input 
-                            type="text" 
-                            name="topic" 
-                            value={editFormData.topic} 
-                            onChange={handleEditChange} 
+                          <input
+                            type="text"
+                            name="topic"
+                            value={editFormData.topic}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                           />
                         ) : (
@@ -759,10 +845,10 @@ export default function SafetyTalkTruckerList() {
                       </td>
                       <td className="px-4 py-3 max-w-xs">
                         {editingId === item._id ? (
-                          <textarea 
-                            name="remarks" 
-                            value={editFormData.remarks} 
-                            onChange={handleEditChange} 
+                          <textarea
+                            name="remarks"
+                            value={editFormData.remarks}
+                            onChange={handleEditChange}
                             className="border rounded-lg px-2 py-1 w-full"
                             rows="2"
                           />
@@ -773,15 +859,15 @@ export default function SafetyTalkTruckerList() {
                       <td className="px-4 py-3 actions">
                         {editingId === item._id ? (
                           <div className="flex gap-2">
-                            <button 
-                              onClick={handleSave} 
+                            <button
+                              onClick={handleSave}
                               className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition"
                               title="Save"
                             >
                               <FiSave className="text-sm" />
                             </button>
-                            <button 
-                              onClick={handleCancel} 
+                            <button
+                              onClick={handleCancel}
                               className="bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-lg transition"
                               title="Cancel"
                             >
@@ -790,14 +876,13 @@ export default function SafetyTalkTruckerList() {
                           </div>
                         ) : (
                           <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleEdit(item)} 
+                            <button
+                              onClick={() => handleEdit(item)}
                               className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition"
                               title="Edit"
                             >
                               <FiEdit className="text-sm" />
                             </button>
-                          
                           </div>
                         )}
                       </td>
@@ -814,16 +899,25 @@ export default function SafetyTalkTruckerList() {
       {viewMode === "card" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredData.map((item, index) => (
-            <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div
+              key={item._id}
+              className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+            >
               <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="bg-white text-blue-600 px-2 py-1 rounded text-sm font-bold">#{index + 1}</span>
-                      <span className="text-blue-100 text-sm">{formatDate(item.date)}</span>
+                      <span className="bg-white text-blue-600 px-2 py-1 rounded text-sm font-bold">
+                        #{index + 1}
+                      </span>
+                      <span className="text-blue-100 text-sm">
+                        {formatDate(item.date)}
+                      </span>
                     </div>
                     <h3 className="font-semibold text-lg">{item.topic}</h3>
-                    <p className="text-blue-100 text-sm">{formatTime12(item.time)}</p>
+                    <p className="text-blue-100 text-sm">
+                      {formatTime12(item.time)}
+                    </p>
                   </div>
                   <input
                     type="checkbox"
@@ -833,65 +927,77 @@ export default function SafetyTalkTruckerList() {
                   />
                 </div>
               </div>
-              
+
               <div className="p-4">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <FiUser className="text-gray-400" />
                     <span className="font-medium">Driver:</span>
-                    <span>{editingId === item._id ? (
-                      <input 
-                        type="text" 
-                        name="driverName" 
-                        value={editFormData.driverName} 
-                        onChange={handleEditChange} 
-                        className="border rounded px-2 py-1 text-sm w-full"
-                      />
-                    ) : item.driverName}</span>
+                    <span>
+                      {editingId === item._id ? (
+                        <input
+                          type="text"
+                          name="driverName"
+                          value={editFormData.driverName}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 text-sm w-full"
+                        />
+                      ) : (
+                        item.driverName
+                      )}
+                    </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <FiTruck className="text-gray-400" />
                     <span className="font-medium">Truck No:</span>
                     <span className="font-mono bg-gray-100 px-2 py-1 rounded text-sm">
                       {editingId === item._id ? (
-                        <input 
-                          type="text" 
-                          name="truckNo" 
-                          value={editFormData.truckNo} 
-                          onChange={handleEditChange} 
+                        <input
+                          type="text"
+                          name="truckNo"
+                          value={editFormData.truckNo}
+                          onChange={handleEditChange}
                           className="border rounded px-2 py-1 text-sm w-full"
                         />
-                      ) : item.truckNo}
+                      ) : (
+                        item.truckNo
+                      )}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <FiUser className="text-gray-400" />
                     <span className="font-medium">Conducted By:</span>
-                    <span>{editingId === item._id ? (
-                      <input 
-                        type="text" 
-                        name="conductedBy" 
-                        value={editFormData.conductedBy} 
-                        onChange={handleEditChange} 
-                        className="border rounded px-2 py-1 text-sm w-full"
-                      />
-                    ) : item.conductedBy}</span>
+                    <span>
+                      {editingId === item._id ? (
+                        <input
+                          type="text"
+                          name="conductedBy"
+                          value={editFormData.conductedBy}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 text-sm w-full"
+                        />
+                      ) : (
+                        item.conductedBy
+                      )}
+                    </span>
                   </div>
-                  
+
                   <div>
                     <span className="font-medium block mb-1">Remarks:</span>
                     {editingId === item._id ? (
-                      <textarea 
-                        name="remarks" 
-                        value={editFormData.remarks} 
-                        onChange={handleEditChange} 
+                      <textarea
+                        name="remarks"
+                        value={editFormData.remarks}
+                        onChange={handleEditChange}
                         className="border rounded px-2 py-1 text-sm w-full"
                         rows="2"
                       />
                     ) : (
-                      <p className="text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">{item.remarks}</p>
+                      <p className="text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                        {item.remarks}
+                      </p>
                     )}
                   </div>
 
@@ -899,50 +1005,50 @@ export default function SafetyTalkTruckerList() {
                     <div className="space-y-2">
                       <div>
                         <span className="font-medium block mb-1">Date:</span>
-                        <input 
-                          type="date" 
-                          name="date" 
-                          value={editFormData.date} 
-                          onChange={handleEditChange} 
+                        <input
+                          type="date"
+                          name="date"
+                          value={editFormData.date}
+                          onChange={handleEditChange}
                           className="border rounded px-2 py-1 text-sm w-full"
                         />
                       </div>
                       <div>
                         <span className="font-medium block mb-1">Time:</span>
-                        <input 
-                          type="time" 
-                          name="time" 
-                          value={editFormData.time} 
-                          onChange={handleEditChange} 
+                        <input
+                          type="time"
+                          name="time"
+                          value={editFormData.time}
+                          onChange={handleEditChange}
                           className="border rounded px-2 py-1 text-sm w-full"
                         />
                       </div>
                       <div>
                         <span className="font-medium block mb-1">Topic:</span>
-                        <input 
-                          type="text" 
-                          name="topic" 
-                          value={editFormData.topic} 
-                          onChange={handleEditChange} 
+                        <input
+                          type="text"
+                          name="topic"
+                          value={editFormData.topic}
+                          onChange={handleEditChange}
                           className="border rounded px-2 py-1 text-sm w-full"
                         />
                       </div>
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex gap-2 mt-4 pt-4 border-t">
                   {editingId === item._id ? (
                     <>
-                      <button 
-                        onClick={handleSave} 
+                      <button
+                        onClick={handleSave}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition text-sm flex items-center justify-center gap-1"
                       >
                         <FiSave className="text-sm" />
                         Save
                       </button>
-                      <button 
-                        onClick={handleCancel} 
+                      <button
+                        onClick={handleCancel}
                         className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition text-sm flex items-center justify-center gap-1"
                       >
                         <FiX className="text-sm" />
@@ -951,14 +1057,13 @@ export default function SafetyTalkTruckerList() {
                     </>
                   ) : (
                     <>
-                      <button 
-                        onClick={() => handleEdit(item)} 
+                      <button
+                        onClick={() => handleEdit(item)}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition text-sm flex items-center justify-center gap-1"
                       >
                         <FiEdit className="text-sm" />
                         Edit
                       </button>
-                      
                     </>
                   )}
                 </div>
@@ -972,8 +1077,12 @@ export default function SafetyTalkTruckerList() {
       {viewMode === "card" && filteredData.length === 0 && (
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <FiMessageSquare className="mx-auto text-6xl text-gray-300 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">No records found</h3>
-          <p className="text-gray-500">Try adjusting your filters or search terms</p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            No records found
+          </h3>
+          <p className="text-gray-500">
+            Try adjusting your filters or search terms
+          </p>
         </div>
       )}
     </div>
