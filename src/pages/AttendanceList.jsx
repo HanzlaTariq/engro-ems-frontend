@@ -267,12 +267,6 @@ export default function AttendanceList() {
     doc.close();
 
     iframe.contentWindow.focus();
-    // iframe.contentWindow.print();
-    // setTimeout(() => {
-    //   if (document.body.contains(iframe)) {
-    //     document.body.removeChild(iframe);
-    //   }
-    // }, 1000);
     const logo = iframe.contentWindow.document.getElementById("printLogo");
     logo.onload = () => {
       iframe.contentWindow.focus();
