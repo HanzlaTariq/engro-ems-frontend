@@ -7,7 +7,7 @@ const formatDate = (isoDate) => {
   if (!isoDate) return "";
   const d = new Date(isoDate);
   return `${String(d.getDate()).padStart(2, "0")}-${String(
-    d.getMonth() + 1
+    d.getMonth() + 1,
   ).padStart(2, "0")}-${d.getFullYear()}`;
 };
 
@@ -27,17 +27,19 @@ export default function EmptyBagList() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await API.get("/api/empty-bag-record/my", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       // Sort by date ascending
       const sorted = (res.data.records || []).sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
+        (a, b) => new Date(a.date) - new Date(b.date),
       );
       setRecords(sorted);
       setError("");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Failed to load empty bag records.");
+      setError(
+        err.response?.data?.message || "Failed to load empty bag records.",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,18 +55,22 @@ export default function EmptyBagList() {
 
     // Filter by exact date
     if (filters.date) {
-      filtered = filtered.filter((i) => i.date && i.date.slice(0, 10) === filters.date);
+      filtered = filtered.filter(
+        (i) => i.date && i.date.slice(0, 10) === filters.date,
+      );
     }
 
     // Filter by month
     if (filters.month) {
-      filtered = filtered.filter((i) => i.date && i.date.slice(0, 7) === filters.month);
+      filtered = filtered.filter(
+        (i) => i.date && i.date.slice(0, 7) === filters.month,
+      );
     }
 
     // Filter by product
     if (filters.product) {
       filtered = filtered.filter((i) =>
-        i.product.toLowerCase().includes(filters.product.toLowerCase())
+        i.product.toLowerCase().includes(filters.product.toLowerCase()),
       );
     }
 
@@ -83,7 +89,7 @@ export default function EmptyBagList() {
       setError("This record has been verified by DO and cannot be edited.");
       return;
     }
-    
+
     setEditingId(item._id);
     setEditFormData({
       ...item,
@@ -101,15 +107,19 @@ export default function EmptyBagList() {
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...editFormData, [name]: value };
-    
+
     // Auto-calculate balanceQty using formula: (Opening Balance + Receipt QTY) - Issued QTY
-    if (name === "openingBalance" || name === "receiptQty" || name === "issuedQty") {
+    if (
+      name === "openingBalance" ||
+      name === "receiptQty" ||
+      name === "issuedQty"
+    ) {
       const opening = parseFloat(updated.openingBalance) || 0;
       const receipt = parseFloat(updated.receiptQty) || 0;
       const issued = parseFloat(updated.issuedQty) || 0;
       updated.balanceQty = opening + receipt - issued;
     }
-    
+
     setEditFormData(updated);
   };
 
@@ -123,18 +133,18 @@ export default function EmptyBagList() {
       const res = await API.put(
         `/api/empty-bag-record/${editFormData._id}`,
         saveData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
+
       if (res.data.success) {
         const updated = res.data.updated;
         setRecords((prev) =>
-          prev.map((i) => (i._id === updated._id ? updated : i))
+          prev.map((i) => (i._id === updated._id ? updated : i)),
         );
         setEditingId(null);
         setEditFormData({});
         setError("");
-        
+
         // Refresh data to ensure consistency
         fetchRecords();
       }
@@ -142,7 +152,7 @@ export default function EmptyBagList() {
       console.error(err);
       const errorMsg = err.response?.data?.message || "Failed to save changes";
       setError(errorMsg);
-      
+
       // If error is about verified record, refresh the data
       if (errorMsg.includes("Cannot edit a verified record")) {
         fetchRecords();
@@ -156,9 +166,9 @@ export default function EmptyBagList() {
       filters.product || (filteredData[0]?.product ?? "All Products");
     const selectedMonth = filters.month
       ? new Date(filters.month + "-01").toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      })
+          month: "long",
+          year: "numeric",
+        })
       : "All Dates";
 
     // Clone table & remove actions column for print
@@ -171,7 +181,10 @@ export default function EmptyBagList() {
     if (headerRow) {
       const headers = Array.from(headerRow.querySelectorAll("th"));
       headers.forEach((th, idx) => {
-        if (th.textContent && th.textContent.trim().toLowerCase().includes("action")) {
+        if (
+          th.textContent &&
+          th.textContent.trim().toLowerCase().includes("action")
+        ) {
           th.remove();
         }
       });
@@ -182,7 +195,10 @@ export default function EmptyBagList() {
       const cells = row.querySelectorAll("td");
       const headers = Array.from(headerRow.querySelectorAll("th"));
       headers.forEach((th, idx) => {
-        if (th.textContent && th.textContent.trim().toLowerCase().includes("action")) {
+        if (
+          th.textContent &&
+          th.textContent.trim().toLowerCase().includes("action")
+        ) {
           if (cells[idx]) cells[idx].remove();
         }
       });
@@ -254,11 +270,25 @@ export default function EmptyBagList() {
     doc.close();
 
     iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => document.body.removeChild(iframe), 1000);
+    // iframe.contentWindow.print();
+    // setTimeout(() => document.body.removeChild(iframe), 1000);
+    const logo = iframe.contentWindow.document.getElementById("printLogo");
+    logo.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    };
+
+    // Agar image already cached ho tab bhi trigger ho
+    logo.complete && logo.onload();
   };
 
-  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-500">Loading...</p>;
 
   return (
     <div className="p-6">
@@ -471,12 +501,18 @@ export default function EmptyBagList() {
                   ) : (
                     // View Mode
                     <>
-                      <td className="px-3 py-1 border">{formatDate(item.date)}</td>
+                      <td className="px-3 py-1 border">
+                        {formatDate(item.date)}
+                      </td>
                       <td className="px-3 py-1 border">{item.product}</td>
-                      <td className="px-3 py-1 border">{item.openingBalance}</td>
+                      <td className="px-3 py-1 border">
+                        {item.openingBalance}
+                      </td>
                       <td className="px-3 py-1 border">{item.receiptQty}</td>
                       <td className="px-3 py-1 border">{item.issuedQty}</td>
-                      <td className="px-3 py-1 border">{item.issuencePurpose}</td>
+                      <td className="px-3 py-1 border">
+                        {item.issuencePurpose}
+                      </td>
                       <td className="px-3 py-1 border">{item.perRef}</td>
                       <td className="px-3 py-1 border">{item.balanceQty}</td>
                       <td className="px-3 py-1 border">{item.whiInitial}</td>
@@ -492,7 +528,9 @@ export default function EmptyBagList() {
                             Edit
                           </button>
                         ) : (
-                          <span className="text-green-600 font-semibold text-sm">Verified</span>
+                          <span className="text-green-600 font-semibold text-sm">
+                            Verified
+                          </span>
                         )}
                       </td>
                     </>

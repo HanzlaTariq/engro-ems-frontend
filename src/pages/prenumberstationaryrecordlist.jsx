@@ -15,7 +15,12 @@ export default function PreNumberStationaryRecordList() {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState({ date: "", receiptFrom: "", receiptTo: "", month: "" });
+  const [filters, setFilters] = useState({
+    date: "",
+    receiptFrom: "",
+    receiptTo: "",
+    month: "",
+  });
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
@@ -24,15 +29,18 @@ export default function PreNumberStationaryRecordList() {
     try {
       const token = localStorage.getItem("token");
       const res = await API.get("/api/pre-number-stationary-record/my", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const sorted = (res.data.records || []).sort(
-        (a, b) => new Date(a.receiptDate) - new Date(b.receiptDate)
+        (a, b) => new Date(a.receiptDate) - new Date(b.receiptDate),
       );
       setRecords(sorted);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Failed to load pre number stationary records.");
+      setError(
+        err.response?.data?.message ||
+          "Failed to load pre number stationary records.",
+      );
     } finally {
       setLoading(false);
     }
@@ -47,17 +55,26 @@ export default function PreNumberStationaryRecordList() {
     let filtered = records;
 
     if (filters.date) {
-      filtered = filtered.filter((i) => i.date && i.date.slice(0, 10) === filters.date);
+      filtered = filtered.filter(
+        (i) => i.date && i.date.slice(0, 10) === filters.date,
+      );
     }
     if (filters.receiptFrom) {
-      filtered = filtered.filter((i) => i.receiptDate && i.receiptDate.slice(0, 10) >= filters.receiptFrom);
+      filtered = filtered.filter(
+        (i) =>
+          i.receiptDate && i.receiptDate.slice(0, 10) >= filters.receiptFrom,
+      );
     }
     if (filters.receiptTo) {
-      filtered = filtered.filter((i) => i.receiptDate && i.receiptDate.slice(0, 10) <= filters.receiptTo);
+      filtered = filtered.filter(
+        (i) => i.receiptDate && i.receiptDate.slice(0, 10) <= filters.receiptTo,
+      );
     }
     if (filters.month) {
       // filters.month is in YYYY-MM format from <input type="month" />
-      filtered = filtered.filter((i) => i.receiptDate && i.receiptDate.slice(0, 7) === filters.month);
+      filtered = filtered.filter(
+        (i) => i.receiptDate && i.receiptDate.slice(0, 7) === filters.month,
+      );
     }
 
     setFilteredData(filtered);
@@ -75,7 +92,7 @@ export default function PreNumberStationaryRecordList() {
       setError("This record has been verified by DO and cannot be edited.");
       return;
     }
-    
+
     setEditingId(item._id);
     setEditFormData({
       ...item,
@@ -108,12 +125,12 @@ export default function PreNumberStationaryRecordList() {
       const res = await API.put(
         `/api/pre-number-stationary-record/${editFormData._id}`,
         saveData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const updated = res.data.updated;
 
       setRecords((prev) =>
-        prev.map((i) => (i._id === updated._id ? updated : i))
+        prev.map((i) => (i._id === updated._id ? updated : i)),
       );
 
       setEditingId(null);
@@ -123,7 +140,7 @@ export default function PreNumberStationaryRecordList() {
       console.error(err);
       const errorMsg = err.response?.data?.message || "Failed to save changes";
       setError(errorMsg);
-      
+
       // If error is about verified record, refresh the data
       if (errorMsg.includes("Cannot edit a verified record")) {
         fetchRecords();
@@ -137,13 +154,14 @@ export default function PreNumberStationaryRecordList() {
       filters.product || (filteredData[0]?.product ?? "All Products");
     const selectedMonth = filters.month
       ? new Date(filters.month + "-01").toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      })
+          month: "long",
+          year: "numeric",
+        })
       : "All Dates";
-    const receiptRange = (filters.receiptFrom || filters.receiptTo)
-      ? `${filters.receiptFrom ? formatDate(filters.receiptFrom) : '...'} to ${filters.receiptTo ? formatDate(filters.receiptTo) : '...'}`
-      : 'All Receipt Dates';
+    const receiptRange =
+      filters.receiptFrom || filters.receiptTo
+        ? `${filters.receiptFrom ? formatDate(filters.receiptFrom) : "..."} to ${filters.receiptTo ? formatDate(filters.receiptTo) : "..."}`
+        : "All Receipt Dates";
 
     // Clone table & remove only a real "Product" column (by header text).
     const originalTable = document.getElementById("printableArea");
@@ -156,7 +174,10 @@ export default function PreNumberStationaryRecordList() {
     if (headerRow) {
       const headers = Array.from(headerRow.querySelectorAll("th"));
       headers.forEach((th, idx) => {
-        if (th.textContent && th.textContent.trim().toLowerCase() === "product") {
+        if (
+          th.textContent &&
+          th.textContent.trim().toLowerCase() === "product"
+        ) {
           productColumnIndex = idx;
         }
       });
@@ -171,7 +192,7 @@ export default function PreNumberStationaryRecordList() {
     }
 
     // Also remove actions column from print
-    tableClone.querySelectorAll(".actions").forEach(el => {
+    tableClone.querySelectorAll(".actions").forEach((el) => {
       el.style.display = "none";
     });
 
@@ -237,7 +258,7 @@ export default function PreNumberStationaryRecordList() {
               <span class="dots"></span>
               <span class="product-name">${selectedProduct}</span>
             </div>
-            ${(filters.month || filters.receiptFrom || filters.receiptTo) ? `<div class="month-line"><strong>Month:</strong> ${selectedMonth} &nbsp; <strong>Receipt:</strong> ${receiptRange}</div>` : ''}
+            ${filters.month || filters.receiptFrom || filters.receiptTo ? `<div class="month-line"><strong>Month:</strong> ${selectedMonth} &nbsp; <strong>Receipt:</strong> ${receiptRange}</div>` : ""}
           </div>
           ${printContent}
           <img src="/engro-logo.png" 
@@ -248,23 +269,46 @@ export default function PreNumberStationaryRecordList() {
     doc.close();
 
     iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => document.body.removeChild(iframe), 1000);
+    // iframe.contentWindow.print();
+    // setTimeout(() => document.body.removeChild(iframe), 1000);
+    const logo = iframe.contentWindow.document.getElementById("printLogo");
+    logo.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    };
+
+    // Agar image already cached ho tab bhi trigger ho
+    logo.complete && logo.onload();
   };
 
-  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
-  if (error && !editingId) return <p className="text-center mt-10 text-red-500">{error}</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-500">Loading...</p>;
+  if (error && !editingId)
+    return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">Pre Number Stationary Records</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Pre Number Stationary Records
+        </h1>
         <div className="flex gap-3">
-          <button onClick={() => navigate(-1)} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+          >
             Back
           </button>
-          <button onClick={handlePrint} className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-yellow-500 transition">
+          <button
+            onClick={handlePrint}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-yellow-500 transition"
+          >
             Print
           </button>
         </div>
@@ -280,7 +324,9 @@ export default function PreNumberStationaryRecordList() {
       {/* Filters */}
       <div className="flex gap-4 mb-6 flex-wrap">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Receipt From</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Receipt From
+          </label>
           <input
             type="date"
             name="receiptFrom"
@@ -291,7 +337,9 @@ export default function PreNumberStationaryRecordList() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Receipt To</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Receipt To
+          </label>
           <input
             type="date"
             name="receiptTo"
@@ -302,7 +350,9 @@ export default function PreNumberStationaryRecordList() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Filter by Month</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Filter by Month
+          </label>
           <input
             type="month"
             name="month"
@@ -334,7 +384,10 @@ export default function PreNumberStationaryRecordList() {
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan="11" className="text-center px-4 py-3 border text-gray-500">
+                <td
+                  colSpan="11"
+                  className="text-center px-4 py-3 border text-gray-500"
+                >
                   No records found.
                 </td>
               </tr>
@@ -442,11 +495,17 @@ export default function PreNumberStationaryRecordList() {
                     <>
                       <td className="px-3 py-1 border">{index + 1}</td>
                       <td className="px-3 py-1 border">{item.bookNo}</td>
-                      <td className="px-3 py-1 border">{formatDate(item.receiptDate)}</td>
+                      <td className="px-3 py-1 border">
+                        {formatDate(item.receiptDate)}
+                      </td>
                       <td className="px-3 py-1 border">{item.from}</td>
                       <td className="px-3 py-1 border">{item.to}</td>
-                      <td className="px-3 py-1 border">{formatDate(item.startDate)}</td>
-                      <td className="px-3 py-1 border">{formatDate(item.endDate)}</td>
+                      <td className="px-3 py-1 border">
+                        {formatDate(item.startDate)}
+                      </td>
+                      <td className="px-3 py-1 border">
+                        {formatDate(item.endDate)}
+                      </td>
                       <td className="px-3 py-1 border">{item.purpose}</td>
                       <td className="px-3 py-1 border">{item.whiInitial}</td>
                       <td className="px-3 py-1 border">
@@ -461,7 +520,9 @@ export default function PreNumberStationaryRecordList() {
                             Edit
                           </button>
                         ) : (
-                          <span className="text-green-600 font-semibold">Verified</span>
+                          <span className="text-green-600 font-semibold">
+                            Verified
+                          </span>
                         )}
                       </td>
                     </>
@@ -473,6 +534,5 @@ export default function PreNumberStationaryRecordList() {
         </table>
       </div>
     </div>
-    
   );
 }

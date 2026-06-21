@@ -7,7 +7,7 @@ const formatDate = (isoDate) => {
   if (!isoDate) return "";
   const d = new Date(isoDate);
   return `${String(d.getDate()).padStart(2, "0")}-${String(
-    d.getMonth() + 1
+    d.getMonth() + 1,
   ).padStart(2, "0")}-${d.getFullYear()}`;
 };
 
@@ -31,7 +31,7 @@ export default function SafetyTalkList() {
   const [filters, setFilters] = useState({
     dateFrom: "",
     dateTo: "",
-    topic: ""
+    topic: "",
   });
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
@@ -42,11 +42,11 @@ export default function SafetyTalkList() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await API.get("/api/safety-talk/my", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       // Sort by date descending (newest first)
       const sorted = (res.data.records || []).sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
+        (a, b) => new Date(b.date) - new Date(a.date),
       );
       setSafetyTalks(sorted);
       setError("");
@@ -68,20 +68,22 @@ export default function SafetyTalkList() {
 
     // Filter by date range
     if (filters.dateFrom) {
-      filtered = filtered.filter((i) =>
-        i.date && i.date.slice(0, 10) >= filters.dateFrom
+      filtered = filtered.filter(
+        (i) => i.date && i.date.slice(0, 10) >= filters.dateFrom,
       );
     }
     if (filters.dateTo) {
-      filtered = filtered.filter((i) =>
-        i.date && i.date.slice(0, 10) <= filters.dateTo
+      filtered = filtered.filter(
+        (i) => i.date && i.date.slice(0, 10) <= filters.dateTo,
       );
     }
 
     // Filter by topic
     if (filters.topic) {
-      filtered = filtered.filter((i) =>
-        i.topic && i.topic.toLowerCase().includes(filters.topic.toLowerCase())
+      filtered = filtered.filter(
+        (i) =>
+          i.topic &&
+          i.topic.toLowerCase().includes(filters.topic.toLowerCase()),
       );
     }
 
@@ -127,12 +129,12 @@ export default function SafetyTalkList() {
       const res = await API.put(
         `/api/safety-talk/${editFormData._id}`,
         saveData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       const updated = res.data.updated;
 
       setSafetyTalks((prev) =>
-        prev.map((i) => (i._id === updated._id ? updated : i))
+        prev.map((i) => (i._id === updated._id ? updated : i)),
       );
 
       setEditingId(null);
@@ -156,7 +158,10 @@ export default function SafetyTalkList() {
     if (headerRow) {
       const headers = Array.from(headerRow.querySelectorAll("th"));
       headers.forEach((th, idx) => {
-        if (th.textContent && th.textContent.trim().toLowerCase().includes("action")) {
+        if (
+          th.textContent &&
+          th.textContent.trim().toLowerCase().includes("action")
+        ) {
           th.remove();
         }
       });
@@ -167,7 +172,10 @@ export default function SafetyTalkList() {
       const cells = row.querySelectorAll("td");
       const headers = Array.from(headerRow.querySelectorAll("th"));
       headers.forEach((th, idx) => {
-        if (th.textContent && th.textContent.trim().toLowerCase().includes("action")) {
+        if (
+          th.textContent &&
+          th.textContent.trim().toLowerCase().includes("action")
+        ) {
           if (cells[idx]) cells[idx].remove();
         }
       });
@@ -262,16 +270,32 @@ export default function SafetyTalkList() {
     doc.close();
 
     iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => document.body.removeChild(iframe), 1000);
+    // iframe.contentWindow.print();
+    // setTimeout(() => document.body.removeChild(iframe), 1000);
+    const logo = iframe.contentWindow.document.getElementById("printLogo");
+    logo.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    };
+
+    // Agar image already cached ho tab bhi trigger ho
+    logo.complete && logo.onload();
   };
-  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-500">Loading...</p>;
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">SAFETY TALK RECORD (WITH LABORERS)</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          SAFETY TALK RECORD (WITH LABORERS)
+        </h1>
         <div className="flex gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -349,14 +373,17 @@ export default function SafetyTalkList() {
         {/* Stats */}
         <div className="flex gap-4 text-sm text-gray-600">
           <div>
-            <span className="font-semibold">Total Records:</span> {safetyTalks.length}
+            <span className="font-semibold">Total Records:</span>{" "}
+            {safetyTalks.length}
           </div>
           <div>
-            <span className="font-semibold">Filtered:</span> {filteredData.length}
+            <span className="font-semibold">Filtered:</span>{" "}
+            {filteredData.length}
           </div>
           {(filters.dateFrom || filters.dateTo) && (
             <div>
-              <span className="font-semibold">Date Range:</span> {filters.dateFrom || '...'} to {filters.dateTo || '...'}
+              <span className="font-semibold">Date Range:</span>{" "}
+              {filters.dateFrom || "..."} to {filters.dateTo || "..."}
             </div>
           )}
         </div>
@@ -381,7 +408,10 @@ export default function SafetyTalkList() {
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center px-4 py-3 border text-gray-500">
+                <td
+                  colSpan="9"
+                  className="text-center px-4 py-3 border text-gray-500"
+                >
                   No records found.
                 </td>
               </tr>

@@ -38,64 +38,68 @@ export default function AttendanceList() {
   const [editingId, setEditingId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
-// Fetch data – ✅ /my endpoint use karo
-const fetchAttendance = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please login to view attendance.");
-      return;
+  // Fetch data – ✅ /my endpoint use karo
+  const fetchAttendance = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please login to view attendance.");
+        return;
+      }
+
+      const res = await API.get(
+        "/api/attendance/my?page=1&limit=1000", // ✅ /my add kar
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setAttendanceData(res.data.attendances); // attendances array
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || "Failed to load attendance data.",
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const res = await API.get(
-      "/api/attendance/my?page=1&limit=1000",  // ✅ /my add kar
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+  // Edit save – ✅ Header add kar
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const saveData = {
+        ...editFormData,
+        date: new Date(editFormData.date).toISOString(),
+      };
 
-    setAttendanceData(res.data.attendances);  // attendances array
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.message || "Failed to load attendance data.");
-  } finally {
-    setLoading(false);
-  }
-};
+      const res = await API.put(
+        `/api/attendance/${editFormData._id}`,
+        saveData,
+        {
+          headers: { Authorization: `Bearer ${token}` }, // ✅ Token add
+        },
+      );
 
-// Edit save – ✅ Header add kar
-const handleSave = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const saveData = {
-      ...editFormData,
-      date: new Date(editFormData.date).toISOString(),
-    };
+      const updatedRecord = res.data.updated;
 
-    const res = await API.put(
-      `/api/attendance/${editFormData._id}`,
-      saveData,
-      { 
-        headers: { Authorization: `Bearer ${token}` }  // ✅ Token add
-      }
-    );
+      // Update state
+      setAttendanceData((prevData) =>
+        prevData.map((item) =>
+          item._id === updatedRecord._id ? updatedRecord : item,
+        ),
+      );
 
-    const updatedRecord = res.data.updated;
-
-    // Update state
-    setAttendanceData((prevData) =>
-      prevData.map((item) => (item._id === updatedRecord._id ? updatedRecord : item))
-    );
-
-    setEditingId(null);
-    setEditFormData({});
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.message || "Failed to save changes");
-  }
-};
+      setEditingId(null);
+      setEditFormData({});
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to save changes");
+    }
+  };
 
   useEffect(() => {
     fetchAttendance();
@@ -113,7 +117,7 @@ const handleSave = async () => {
     // Filter by signature (case-insensitive)
     if (filters.signature) {
       filtered = filtered.filter((i) =>
-        i.whiSignature.toLowerCase().includes(filters.signature.toLowerCase())
+        i.whiSignature.toLowerCase().includes(filters.signature.toLowerCase()),
       );
     }
 
@@ -152,7 +156,8 @@ const handleSave = async () => {
       if (timeIn && timeOut) {
         const outMinutes = toMinutes(timeOut);
         const routineEnd = toMinutes("17:30");
-        newFormData.extraTime = outMinutes > routineEnd ? outMinutes - routineEnd : 0;
+        newFormData.extraTime =
+          outMinutes > routineEnd ? outMinutes - routineEnd : 0;
       } else {
         newFormData.extraTime = 0;
       }
@@ -161,10 +166,8 @@ const handleSave = async () => {
     setEditFormData(newFormData);
   };
 
-  
-
   // Print
- const handlePrint = () => {
+  const handlePrint = () => {
     const printContent = document.getElementById("printableArea").innerHTML;
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
@@ -264,22 +267,38 @@ const handleSave = async () => {
     doc.close();
 
     iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-    }, 1000);
+    // iframe.contentWindow.print();
+    // setTimeout(() => {
+    //   if (document.body.contains(iframe)) {
+    //     document.body.removeChild(iframe);
+    //   }
+    // }, 1000);
+    const logo = iframe.contentWindow.document.getElementById("printLogo");
+    logo.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    };
+
+    // Agar image already cached ho tab bhi trigger ho
+    logo.complete && logo.onload();
   };
 
-  if (loading) return <p className="text-center mt-10 text-gray-500">Loading...</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-500">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">WHI Attendance Register</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          WHI Attendance Register
+        </h1>
         <div className="flex gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -299,7 +318,9 @@ const handleSave = async () => {
       {/* Filters */}
       <div className="flex gap-4 mb-6 flex-wrap">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Filter by Date</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Filter by Date
+          </label>
           <input
             type="date"
             name="date"
@@ -309,7 +330,9 @@ const handleSave = async () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Filter by Signature</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Filter by Signature
+          </label>
           <input
             type="text"
             name="signature"
@@ -339,7 +362,10 @@ const handleSave = async () => {
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center px-4 py-3 border text-gray-500">
+                <td
+                  colSpan="8"
+                  className="text-center px-4 py-3 border text-gray-500"
+                >
                   No records found.
                 </td>
               </tr>
@@ -347,8 +373,11 @@ const handleSave = async () => {
               filteredData.map((item) => (
                 <tr
                   key={item._id}
-                  className={`${filteredData.indexOf(item) % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } hover:bg-indigo-50 transition`}
+                  className={`${
+                    filteredData.indexOf(item) % 2 === 0
+                      ? "bg-white"
+                      : "bg-gray-50"
+                  } hover:bg-indigo-50 transition`}
                 >
                   <td className="px-4 py-2 border">
                     {editingId === item._id ? (
