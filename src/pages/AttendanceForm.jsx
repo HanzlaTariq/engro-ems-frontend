@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import API from "../utils/api.js";
@@ -116,7 +115,10 @@ export default function AttendanceForm({ onSuccess }) {
       extraTime: "",
       directDiversion: "",
       totalHandling: "",
+      storageLocation: "",
+      plantCode: "",
       whiSignature: user?.email || "",
+
     });
     setErrors({});
     if (onSuccess) onSuccess();
@@ -140,6 +142,12 @@ export default function AttendanceForm({ onSuccess }) {
     { name: "timeOut", label: "Time Out", type: "time" },
     { name: "directDiversion", label: "Direct Diversion", type: "number" },
     { name: "totalHandling", label: "Total Handling", type: "number" },
+    { name: "extraTime", label: "Extra Time", type: "text", readOnly: true },
+    { name: "storageLocation", label: "Storage Location", type: "text" },
+    { name: "plantCode", label: "Plant Code", type: "text" },
+    { name: "whiSignature", label: "WareHouse Incharge Signature", type: "text" },
+
+
   ];
 
   return (
@@ -161,6 +169,7 @@ export default function AttendanceForm({ onSuccess }) {
                 name={field.name}
                 value={form[field.name]}
                 onChange={handleChange}
+                readOnly={field.readOnly || false}
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors[field.name] ? "border-red-500" : "border-gray-300"
                   }`}
               />
@@ -171,41 +180,6 @@ export default function AttendanceForm({ onSuccess }) {
               )}
             </div>
           ))}
-
-          {/* 🔹 Auto-calculated Extra Time (Read-only) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Extra Time
-            </label>
-            <input
-              type="text"
-              name="extraTime"
-              value={form.extraTime}
-              readOnly
-              className="w-full border rounded-md px-3 py-2 bg-gray-100"
-            />
-          </div>
-
-          {/* Signature full width */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              WareHouse Incharge
-            </label>
-            <input
-              type="text"
-              name="whiSignature"
-              value={form.whiSignature}
-              onChange={handleChange}
-              
-              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.whiSignature ? "border-red-500" : "border-gray-300"
-                }`}
-            />
-            {errors.whiSignature && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.whiSignature}
-              </p>
-            )}
-          </div>
         </div>
 
         <button

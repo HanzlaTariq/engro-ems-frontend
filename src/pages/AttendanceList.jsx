@@ -270,12 +270,6 @@ export default function AttendanceList() {
         </head>
         <body>
           <h2>WHI Attendance Register</h2>
-          <div class="info-boxes">
-            <div class="info-box">Month: __________</div>
-            <div class="info-box">Year: __________</div>
-            <div class="info-box">WH Location: __________</div>
-            <div class="info-box">WHI: __________</div>
-          </div>
           ${printContent}
           <img src="/engro-logo.svg" 
                alt="Engro Logo" class="logo" id="printLogo" />
@@ -367,6 +361,8 @@ export default function AttendanceList() {
               <th className="px-4 py-3 border">Extra Time(minute)</th>
               <th className="px-4 py-3 border">Direct Diversion</th>
               <th className="px-4 py-3 border">Total Handling(Met)</th>
+              <th className="px-4 py-3 border">Location</th>
+              <th className="px-4 py-3 border">Plant Code</th>
               <th className="px-4 py-3 border">WHI Signature</th>
               <th className="px-4 py-3 border actions">Actions</th>
             </tr>
@@ -467,6 +463,32 @@ export default function AttendanceList() {
                       />
                     ) : (
                       item.totalHandling
+                    )}
+                  </td>
+                  <td className="px-4 py-2 border">
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="Location"
+                        value={editFormData.Location}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1"
+                      />
+                    ) : (
+                      item.Location
+                    )}
+                  </td>
+                  <td className="px-4 py-2 border">
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="plantCode"
+                        value={editFormData.plantCode}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1"
+                      />
+                    ) : (
+                      item.plantCode
                     )}
                   </td>
                   <td className="px-4 py-2 border">{item.whiSignature}</td>
