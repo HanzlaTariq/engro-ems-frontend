@@ -210,16 +210,16 @@ export default function SafetyTalkRecordWithTrucker({ onSuccess }) {
                 }`}
             >
               <option value="">-- Select Topic --</option>
-              <option value="Proper Use and Maintenance of Personal Protective Equipment (PPE)">Proper Use and Maintenance of Personal Protective Equipment (PPE)</option>
-              <option value="Comprehensive Fire Safety Procedures and Emergency Response Plans">Comprehensive Fire Safety Procedures and Emergency Response Plans</option>
-              <option value="Electrical Safety Protocols and Hazard Prevention Strategies">Electrical Safety Protocols and Hazard Prevention Strategies</option>
-              <option value="Safe Operation and Handling of Industrial Machinery and Equipment">Safe Operation and Handling of Industrial Machinery and Equipment</option>
-              <option value="Step-by-Step Emergency Evacuation and Disaster Preparedness Training">Step-by-Step Emergency Evacuation and Disaster Preparedness Training</option>
-              <option value="Chemical Storage, Handling, and Spill Response Safety Guidelines">Chemical Storage, Handling, and Spill Response Safety Guidelines</option>
-              <option value="Proper Ladder Use and Fall Prevention Techniques in the Workplace">Proper Ladder Use and Fall Prevention Techniques in the Workplace</option>
-              <option value="Ergonomic Best Practices to Prevent Workplace Injuries and Strain">Ergonomic Best Practices to Prevent Workplace Injuries and Strain</option>
-              <option value="Prevention and Management of Workplace Violence and Threat Situations">Prevention and Management of Workplace Violence and Threat Situations</option>
-              <option value="First Aid and CPR Training for Emergency Medical Situations">First Aid and CPR Training for Emergency Medical Situations</option>
+              <option value="Don't smoking in WH permises">Don't smoking in WH permises</option>
+              <option value="Don't use cellphone when vehicle in movement.">Don't use cellphone when vehicle in movement.</option>
+              <option value="Use of safety cones its important.">Use of safety cones its important.</option>
+              <option value="Use of wooden wedges after parking the vehicle.">Use of wooden wedges after parking the vehicle.</option>
+              <option value="Be extra careful when vehicle in reverse mode.">Be extra careful when vehicle in reverse mode.</option>
+              <option value="Don't play any music or radio tape in WH permises.">Don't play any music or radio tape in WH permises.</option>
+              <option value="Be extra careful when you pass the main gate of WH.">Be extra careful when you pass the main gate of WH.</option>
+              <option value="Don't use of hooks during loading and unloading.">Don't use of hooks during loading and unloading.</option>
+              <option value="Avoid Working on stack edges.">Avoid Working on stack edges.</option>
+              <option value="Only healthy and fit labor are allow to work at WH.">Only healthy and fit labor are allow to work at WH.</option>
             </select>
             {errors.topic && (
               <p className="text-sm text-red-500 mt-1">{errors.topic}</p>

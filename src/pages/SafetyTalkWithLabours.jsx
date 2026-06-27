@@ -198,6 +198,11 @@ export default function SafetyTalkForm({ onSuccess }) {
                 }`}
             >
               <option value="">-- Select Topic --</option>
+              <option value="Don't use of hooks during loading and unloading.">Don't use of hooks during loading and unloading.</option>
+              <option value="Avoid Working on stack edges.">Avoid Working on stack edges.</option>
+              <option value="Only healthy and fit labor are allow to work at WH.">Only healthy and fit labor are allow to work at WH.</option>
+              <option value="Avoid working more than 6 feet.">Avoid working more than 6 feet.</option>
+              <option value="Don't smoking in WH permises">Don't smoking in WH permises</option>
               <option value="Wear PPE –Lungi, Wrist band, Head band, etc">Wear PPE –Lungi, Wrist band, Head band, etc</option>
               <option value="Store safely – keep fertilizer dry, away from heat and moisture.">Store safely – keep fertilizer dry, away from heat and moisture.</option>
               <option value="Avoid spills – clean immediately and safely.">Avoid spills – clean immediately and safely.</option>

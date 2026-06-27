@@ -196,7 +196,7 @@ export default function AttendanceForm({ onSuccess }) {
               name="whiSignature"
               value={form.whiSignature}
               onChange={handleChange}
-              readOnly
+              
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.whiSignature ? "border-red-500" : "border-gray-300"
                 }`}
             />

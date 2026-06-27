@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../utils/api.js";
 const formatDate = (isoDate) => {
@@ -100,6 +99,25 @@ export default function AttendanceList() {
       setError(err.response?.data?.message || "Failed to save changes");
     }
   };
+  
+  // delete record
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this record?")) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      await API.delete(`/api/attendance/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAttendanceData((prevData) => prevData.filter((item) => item._id !== id));
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to delete record");
+    }
+   
+  }
+
 
   useEffect(() => {
     fetchAttendance();
@@ -469,12 +487,21 @@ export default function AttendanceList() {
                         </button>
                       </>
                     ) : (
+                      <>
                       <button
                         onClick={() => handleEdit(item)}
                         className="bg-blue-600 text-white px-3 py-1 rounded"
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded ml-2"
+                      >
+                        Delete
+                      </button>
+                      </>
+                      
                     )}
                   </td>
                 </tr>
