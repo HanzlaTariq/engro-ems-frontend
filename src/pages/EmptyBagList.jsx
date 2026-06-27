@@ -262,7 +262,7 @@ export default function EmptyBagList() {
           <h2>Empty Bag Records</h2>
           
           ${printContent}
-          <img src="/engro-logo.png" 
+          <img src="/engro-logo.svg" 
                alt="Engro Logo" class="logo" id="printLogo" />
         </body>
       </html>

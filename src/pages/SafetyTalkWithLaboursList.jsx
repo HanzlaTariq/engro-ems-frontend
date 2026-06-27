@@ -262,7 +262,7 @@ export default function SafetyTalkList() {
       <body>
         <h2>SAFETY TALK RECORD (WITH LABORERS)</h2>
         ${printContent}
-        <img src="/engro-logo.png" 
+        <img src="/engro-logo.svg" 
              alt="Engro Logo" class="logo" id="printLogo" />
       </body>
     </html>
@@ -325,7 +325,7 @@ export default function SafetyTalkList() {
           <h3 className="text-lg font-semibold text-gray-700">Filters</h3>
           <button
             onClick={clearFilters}
-            className="text-sm text-red-600 hover:text-red-800"
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 transition cursor-pointer"
           >
             Clear Filters
           </button>

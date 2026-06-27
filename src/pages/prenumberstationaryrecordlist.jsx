@@ -261,7 +261,7 @@ export default function PreNumberStationaryRecordList() {
             ${filters.month || filters.receiptFrom || filters.receiptTo ? `<div class="month-line"><strong>Month:</strong> ${selectedMonth} &nbsp; <strong>Receipt:</strong> ${receiptRange}</div>` : ""}
           </div>
           ${printContent}
-          <img src="/engro-logo.png" 
+          <img src="/engro-logo.svg" 
                alt="Engro Logo" class="logo" id="printLogo" />
         </body>
       </html>

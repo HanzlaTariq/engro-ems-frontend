@@ -387,7 +387,7 @@ export default function SafetyTalkTruckerList() {
           </div>
           ${printContent}
           
-          <img src="/engro-logo.png" 
+          <img src="/engro-logo.svg" 
                alt="Engro Logo" class="logo" id="printLogo" />
         </body>
       </html>
