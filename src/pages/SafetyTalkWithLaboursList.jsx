@@ -401,6 +401,8 @@ export default function SafetyTalkList() {
               <th className="px-2 py-1 border">No. of Labours</th>
               <th className="px-2 py-1 border">H/C Present</th>
               <th className="px-2 py-1 border">Topic</th>
+              <th className="px-2 py-1 border">Storage Location</th>
+              <th className="px-2 py-1 border">Plant Code</th>
               <th className="px-2 py-1 border">Remarks</th>
               <th className="px-2 py-1 border actions">Actions</th>
             </tr>
@@ -409,7 +411,7 @@ export default function SafetyTalkList() {
             {filteredData.length === 0 ? (
               <tr>
                 <td
-                  colSpan="9"
+                  colSpan="11"
                   className="text-center px-4 py-3 border text-gray-500"
                 >
                   No records found.
@@ -495,6 +497,32 @@ export default function SafetyTalkList() {
                       />
                     ) : (
                       item.topic
+                    )}
+                  </td>
+                  <td className="px-3 py-1 border">
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="storageLocation"
+                        value={editFormData.storageLocation || ""}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full text-sm"
+                      />
+                    ) : (
+                      item.storageLocation || ""
+                    )}
+                  </td>
+                  <td className="px-3 py-1 border">
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="plantCode"
+                        value={editFormData.plantCode || ""}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 w-full text-sm"
+                      />
+                    ) : (
+                      item.plantCode || ""
                     )}
                   </td>
                   <td className="px-3 py-1 border">

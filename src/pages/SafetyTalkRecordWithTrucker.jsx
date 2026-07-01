@@ -11,6 +11,8 @@ export default function SafetyTalkRecordWithTrucker({ onSuccess }) {
     truckNo: "",
     driverName: "",
     topic: "",
+    storageLocation: "",
+    plantCode: "",
     remarks: "Excellent",
   });
 
@@ -72,9 +74,11 @@ export default function SafetyTalkRecordWithTrucker({ onSuccess }) {
         date: new Date().toISOString().split("T")[0],
         time: "09:00",
         conductedBy: "",
-        noOfLabours: "",
-        hcPresent: "Yes",
+        truckNo: "",
+        driverName: "",
         topic: "",
+        storageLocation: "",
+        plantCode: "",
         remarks: "Excellent",
       });
       setErrors({});
@@ -227,6 +231,32 @@ export default function SafetyTalkRecordWithTrucker({ onSuccess }) {
           </div>
 
 
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Storage Location
+            </label>
+            <input
+              type="text"
+              name="storageLocation"
+              value={form.storageLocation}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Plant Code
+            </label>
+            <input
+              type="text"
+              name="plantCode"
+              value={form.plantCode}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
           {/* Remarks */}
           <div>

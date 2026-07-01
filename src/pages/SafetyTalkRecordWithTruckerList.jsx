@@ -739,6 +739,8 @@ export default function SafetyTalkTruckerList() {
                   <th className="px-4 py-4 text-left">Truck No</th>
                   <th className="px-4 py-4 text-left">Driver Name</th>
                   <th className="px-4 py-4 text-left">Topic</th>
+                  <th className="px-4 py-4 text-left">Storage Location</th>
+                  <th className="px-4 py-4 text-left">Plant Code</th>
                   <th className="px-4 py-4 text-left">Remarks</th>
                   <th className="px-4 py-4 text-left actions">Actions</th>
                 </tr>
@@ -841,6 +843,32 @@ export default function SafetyTalkTruckerList() {
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                             {item.topic}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingId === item._id ? (
+                          <input
+                            type="text"
+                            name="storageLocation"
+                            value={editFormData.storageLocation || ""}
+                            onChange={handleEditChange}
+                            className="border rounded-lg px-2 py-1 w-full"
+                          />
+                        ) : (
+                          item.storageLocation || ""
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {editingId === item._id ? (
+                          <input
+                            type="text"
+                            name="plantCode"
+                            value={editFormData.plantCode || ""}
+                            onChange={handleEditChange}
+                            className="border rounded-lg px-2 py-1 w-full"
+                          />
+                        ) : (
+                          item.plantCode || ""
                         )}
                       </td>
                       <td className="px-4 py-3 max-w-xs">
@@ -982,6 +1010,40 @@ export default function SafetyTalkTruckerList() {
                         item.conductedBy
                       )}
                     </span>
+                  </div>
+
+                  <div>
+                    <span className="font-medium block mb-1">Storage Location:</span>
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="storageLocation"
+                        value={editFormData.storageLocation || ""}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 text-sm w-full"
+                      />
+                    ) : (
+                      <p className="text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                        {item.storageLocation || "-"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <span className="font-medium block mb-1">Plant Code:</span>
+                    {editingId === item._id ? (
+                      <input
+                        type="text"
+                        name="plantCode"
+                        value={editFormData.plantCode || ""}
+                        onChange={handleEditChange}
+                        className="border rounded px-2 py-1 text-sm w-full"
+                      />
+                    ) : (
+                      <p className="text-gray-600 text-sm bg-gray-50 p-2 rounded-lg">
+                        {item.plantCode || "-"}
+                      </p>
+                    )}
                   </div>
 
                   <div>
