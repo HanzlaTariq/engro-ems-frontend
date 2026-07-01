@@ -124,6 +124,20 @@ export default function WeeklySpotCheckForm() {
         setForm({ ...form, fireExtinguishers: updated });
     };
 
+     // Add a new fire extinguisher row
+    const addFireExtinguisher = () => {
+        const newExtinguisher = { lastRefill: "", expiry: "", pressure: "", nozzle: "", seal: "" };
+        setForm({ ...form, fireExtinguishers: [...form.fireExtinguishers, newExtinguisher] });
+    };
+
+    // Remove a fire extinguisher row
+    const removeFireExtinguisher = (index) => {
+        if (form.fireExtinguishers.length <= 1) return;
+        const updated = form.fireExtinguishers.filter((_, i) => i !== index);
+        setForm({ ...form, fireExtinguishers: updated });
+    };
+
+
     // Helper for safety ramp change
     const handleSafetyRampChange = (index, key, value) => {
         const updated = [...form.safetyRamp];
@@ -931,7 +945,16 @@ export default function WeeklySpotCheckForm() {
 
                 {/* Fire Extinguishers */}
                 <div>
-                    <h2 className="text-lg font-semibold mb-2">Fire Extinguishers</h2>
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-lg font-semibold">Fire Extinguishers</h2>
+                        <button
+                            type="button"
+                            onClick={addFireExtinguisher}
+                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                        >
+                            + Add Fire Extinguisher
+                        </button>
+                    </div>
                     <table className="w-full border">
                         <thead>
                             <tr className="bg-gray-100">
@@ -940,6 +963,7 @@ export default function WeeklySpotCheckForm() {
                                 <th className="border px-2 py-1">F.E Gauge / Pressure</th>
                                 <th className="border px-2 py-1">Nozzle Condition</th>
                                 <th className="border px-2 py-1">F.E Seal</th>
+                                <th className="border px-2 py-1">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -997,6 +1021,17 @@ export default function WeeklySpotCheckForm() {
                                             }
                                             placeholder="F.E Seal"
                                         />
+                                    </td>
+                                    <td className="border px-2 py-1 text-center">
+                                        {form.fireExtinguishers.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeFireExtinguisher(i)}
+                                                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
