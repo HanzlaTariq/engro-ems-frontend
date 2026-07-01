@@ -18,6 +18,8 @@ export default function EmptyBagRecord({ onSuccess }) {
     issuencePurpose: "",
     perRef: "",
     balanceQty: "",
+    storageLocation: "",
+    plantCode: "",
     whiInitial: user?.name || "",
     doVerified: "DO Not Verified", // default, no input for this
   });
@@ -107,13 +109,19 @@ export default function EmptyBagRecord({ onSuccess }) {
       showConfirmButton: false,
     });
 
-    // Reset form if needed
     setForm({
-      // Set default/reset values here
       date: new Date().toISOString().split("T")[0],
-      field1: "",
-      field2: "",
-      // Add other fields as per your form
+      product: "",
+      openingBalance: "",
+      receiptQty: "",
+      issuedQty: "",
+      issuencePurpose: "",
+      perRef: "",
+      balanceQty: "",
+      storageLocation: "",
+      plantCode: "",
+      whiInitial: user?.name || "",
+      doVerified: "DO Not Verified",
     });
     setErrors({});
 
@@ -136,6 +144,8 @@ export default function EmptyBagRecord({ onSuccess }) {
     { name: "issuedQty", label: "Issued QTY", type: "number" },
     { name: "issuencePurpose", label: "Issuence Purpose", type: "text" },
     { name: "perRef", label: "Per Ref", type: "text" },
+    { name: "storageLocation", label: "Storage Location", type: "text" },
+    { name: "plantCode", label: "Plant Code", type: "text" },
   ];
 
   return (

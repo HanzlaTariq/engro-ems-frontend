@@ -373,6 +373,8 @@ export default function EmptyBagList() {
               <th className="px-2 py-1 border">Issued Qty</th>
               <th className="px-2 py-1 border">Issuance Purpose</th>
               <th className="px-2 py-1 border">Per Ref</th>
+              <th className="px-2 py-1 border">Storage Location</th>
+              <th className="px-2 py-1 border">Plant Code</th>
               <th className="px-2 py-1 border">Balance Qty</th>
               <th className="px-2 py-1 border">WHI Initial</th>
               <th className="px-2 py-1 border">DO Verified</th>
@@ -460,6 +462,24 @@ export default function EmptyBagList() {
                       </td>
                       <td className="px-3 py-1 border">
                         <input
+                          type="text"
+                          name="storageLocation"
+                          value={editFormData.storageLocation || ""}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 w-full text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-1 border">
+                        <input
+                          type="text"
+                          name="plantCode"
+                          value={editFormData.plantCode || ""}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 w-full text-sm"
+                        />
+                      </td>
+                      <td className="px-3 py-1 border">
+                        <input
                           type="number"
                           name="balanceQty"
                           value={editFormData.balanceQty || ""}
@@ -514,6 +534,8 @@ export default function EmptyBagList() {
                         {item.issuencePurpose}
                       </td>
                       <td className="px-3 py-1 border">{item.perRef}</td>
+                      <td className="px-3 py-1 border">{item.storageLocation || ""}</td>
+                      <td className="px-3 py-1 border">{item.plantCode || ""}</td>
                       <td className="px-3 py-1 border">{item.balanceQty}</td>
                       <td className="px-3 py-1 border">{item.whiInitial}</td>
                       <td className="px-3 py-1 border">
