@@ -376,6 +376,8 @@ export default function PreNumberStationaryRecordList() {
               <th className="px-2 py-1 border">Start Date</th>
               <th className="px-2 py-1 border">End Date</th>
               <th className="px-2 py-1 border">Purpose</th>
+              <th className="px-2 py-1 border">Storage Location</th>
+              <th className="px-2 py-1 border">Plant Code</th>
               <th className="px-2 py-1 border">WHI Initial</th>
               <th className="px-2 py-1 border">DO Verified</th>
               <th className="px-2 py-1 border actions">Actions</th>
@@ -464,6 +466,24 @@ export default function PreNumberStationaryRecordList() {
                       <td className="px-3 py-1 border">
                         <input
                           type="text"
+                          name="storageLocation"
+                          value={editFormData.storageLocation || ""}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 w-full"
+                        />
+                      </td>
+                      <td className="px-3 py-1 border">
+                        <input
+                          type="text"
+                          name="plantCode"
+                          value={editFormData.plantCode || ""}
+                          onChange={handleEditChange}
+                          className="border rounded px-2 py-1 w-full"
+                        />
+                      </td>
+                      <td className="px-3 py-1 border">
+                        <input
+                          type="text"
                           name="whiInitial"
                           value={editFormData.whiInitial || ""}
                           onChange={handleEditChange}
@@ -507,6 +527,8 @@ export default function PreNumberStationaryRecordList() {
                         {formatDate(item.endDate)}
                       </td>
                       <td className="px-3 py-1 border">{item.purpose}</td>
+                      <td className="px-3 py-1 border">{item.storageLocation || ""}</td>
+                      <td className="px-3 py-1 border">{item.plantCode || ""}</td>
                       <td className="px-3 py-1 border">{item.whiInitial}</td>
                       <td className="px-3 py-1 border">
                         {item.doEmail || "DO Not Verified"}

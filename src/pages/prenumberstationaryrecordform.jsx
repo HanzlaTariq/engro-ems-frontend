@@ -15,6 +15,8 @@ export default function PreNumberStationaryRecordForm({ onSuccess }) {
     startDate: "",
     endDate: "",
     purpose: "",
+    storageLocation: "",
+    plantCode: "",
     whiInitial: user?.name || "",
     doVerified: "DO Not Verified",
   });
@@ -89,6 +91,8 @@ const handleSubmit = async (e) => {
       startDate:"",
       endDate: "",
       purpose: "",
+      storageLocation: "",
+      plantCode: "",
       whiInitial: user?.email || "",
       doVerified: "DO Not Verified",
     });
@@ -116,6 +120,8 @@ const handleSubmit = async (e) => {
     { name: "startDate", label: "Start Date", type: "date" },
     { name: "endDate", label: "End Date", type: "date" },
     { name: "purpose", label: "Purpose", type: "text" },
+    { name: "storageLocation", label: "Storage Location", type: "text" },
+    { name: "plantCode", label: "Plant Code", type: "text" },
   ];
 
   return (
