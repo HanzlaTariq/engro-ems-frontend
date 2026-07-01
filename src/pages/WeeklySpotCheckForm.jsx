@@ -7,6 +7,8 @@ export default function WeeklySpotCheckForm() {
     const { user } = React.useContext(AuthContext);    
     const [form, setForm] = useState({
         date: new Date().toISOString().split("T")[0],
+        storageLocation: "",
+        plantCode: "",
         stocks: [
             { item: "Urea", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
             { item: "EEDAP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
@@ -224,6 +226,29 @@ export default function WeeklySpotCheckForm() {
                         onChange={(e) => setForm({ ...form, date: e.target.value })}
                         className="border rounded-md px-3 py-2 w-full"
                     />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label className="block text-sm font-medium">Storage Location</label>
+                        <input
+                            type="text"
+                            value={form.storageLocation}
+                            onChange={(e) => setForm({ ...form, storageLocation: e.target.value })}
+                            className="border rounded-md px-3 py-2 w-full"
+                            placeholder="Storage location"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium">Plant Code</label>
+                        <input
+                            type="text"
+                            value={form.plantCode}
+                            onChange={(e) => setForm({ ...form, plantCode: e.target.value })}
+                            className="border rounded-md px-3 py-2 w-full"
+                            placeholder="Plant code"
+                        />
+                    </div>
                 </div>
 
                 {/* Stock Section */}

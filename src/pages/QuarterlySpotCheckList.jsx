@@ -349,6 +349,14 @@ export default function QuarterlySpotCheckPrintView() {
                                                             <div className="font-medium text-gray-800">{selectedCheck.warehouseIncharge}</div>
                                                         </div>
                                                         <div>
+                                                            <label className="block text-xs text-gray-500 mb-1">Storage Location</label>
+                                                            <div className="font-medium text-gray-800">{selectedCheck.storageLocation || "-"}</div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs text-gray-500 mb-1">Plant Code</label>
+                                                            <div className="font-medium text-gray-800">{selectedCheck.plantCode || "-"}</div>
+                                                        </div>
+                                                        <div>
                                                             <label className="block text-xs text-gray-500 mb-1">Verified By</label>
                                                             <div className="font-medium text-gray-800">{selectedCheck.doEmail}</div>
                                                         </div>
@@ -456,6 +464,8 @@ export default function QuarterlySpotCheckPrintView() {
                     <div className="mb-1">
                         <p><strong>Date:</strong> _________________</p>
                         <p><strong>As per WMS Dated:</strong> _________________</p>
+                        <p><strong>Storage Location:</strong> {selectedCheck.storageLocation || "-"}</p>
+                        <p><strong>Plant Code:</strong> {selectedCheck.plantCode || "-"}</p>
                     </div>
 
                     {/* Stock Table */}
