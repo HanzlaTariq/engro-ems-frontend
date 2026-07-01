@@ -840,6 +840,14 @@ export default function WeeklySpotCheckPrintView() {
                         </div>
                     </div>
 
+                    <div className="mt-2 flex justify-center">
+                        <img
+                            src="/engro-logo.svg"
+                            alt="Engro logo"
+                            className="h-10 w-auto"
+                        />
+                    </div>
+
                 </div>
             )}
         </div>

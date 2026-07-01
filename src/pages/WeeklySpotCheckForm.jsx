@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import API from "../api/axios.jsx";
