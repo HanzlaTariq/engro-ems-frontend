@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios.jsx";
 
@@ -96,9 +95,9 @@ export default function PreNumberStationaryRecordList() {
     setEditingId(item._id);
     setEditFormData({
       ...item,
-      receiptDate: item.receiptDate.slice(0, 10),
-      startDate: item.startDate.slice(0, 10),
-      endDate: item.endDate.slice(0, 10),
+      receiptDate: item.receiptDate ? item.receiptDate.slice(0, 10) : "",
+      startDate: item.startDate ? item.startDate.slice(0, 10) : "",
+      endDate: item.endDate ? item.endDate.slice(0, 10) : "",
     });
   };
 
@@ -117,11 +116,24 @@ export default function PreNumberStationaryRecordList() {
     try {
       const token = localStorage.getItem("token");
       const saveData = {
-        ...editFormData,
-        receiptDate: new Date(editFormData.receiptDate).toISOString(),
-        startDate: new Date(editFormData.startDate).toISOString(),
-        endDate: new Date(editFormData.endDate).toISOString(),
+        bookNo: editFormData.bookNo,
+        receiptDate: editFormData.receiptDate
+          ? new Date(editFormData.receiptDate).toISOString()
+          : undefined,
+        from: editFormData.from,
+        to: editFormData.to,
+        startDate: editFormData.startDate
+          ? new Date(editFormData.startDate).toISOString()
+          : undefined,
+        endDate: editFormData.endDate
+          ? new Date(editFormData.endDate).toISOString()
+          : undefined,
+        purpose: editFormData.purpose,
+        storageLocation: editFormData.storageLocation,
+        plantCode: editFormData.plantCode,
+        whiInitial: editFormData.whiInitial,
       };
+
       const res = await API.put(
         `/api/pre-number-stationary-record/${editFormData._id}`,
         saveData,
