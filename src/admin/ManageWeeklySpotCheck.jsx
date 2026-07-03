@@ -687,6 +687,7 @@ export default function ManageWeeklySpotCheck() {
                           <div className="grid grid-cols-2 gap-2">
                             <p><span className="font-medium">Last Refill:</span> {formatDate(fire.lastRefill)}</p>
                             <p><span className="font-medium">Expiry:</span> {formatDate(fire.expiry)}</p>
+                            <p><span className="font-medium">Quantity:</span> {fire.quantity ?? ""}</p>
                             <p><span className="font-medium">Pressure:</span> {fire.pressure}</p>
                             <p><span className="font-medium">Nozzle:</span> {fire.nozzle}</p>
                             <p><span className="font-medium">Seal:</span> {fire.seal}</p>

@@ -62,10 +62,10 @@ export default function QuarterlySpotCheckForm() {
             warehouseReg: { from: "", to: "", reminderDate: "" },
         },
         fireExtinguishers: [
-            { lastRefill: "", expiry: "", pressure: "", nozzle: "", seal: "" },
-            { lastRefill: "", expiry: "", pressure: "", nozzle: "", seal: "" },
-            { lastRefill: "", expiry: "", pressure: "", nozzle: "", seal: "" },
-            { lastRefill: "", expiry: "", pressure: "", nozzle: "", seal: "" },
+            { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
+            { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
+            { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
+            { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
         ],
         safetyRamp: [
             { frequently: "Weekly", status: "", remarks: "" },
@@ -959,6 +959,7 @@ export default function QuarterlySpotCheckForm() {
                             <tr className="bg-gray-100">
                                 <th className="border px-2 py-1">Last Refilling Date</th>
                                 <th className="border px-2 py-1">Expiry Date</th>
+                                <th className="border px-2 py-1">Quantity</th>
                                 <th className="border px-2 py-1">F.E Gauge / Pressure</th>
                                 <th className="border px-2 py-1">Nozzle Condition</th>
                                 <th className="border px-2 py-1">F.E Seal</th>
@@ -986,6 +987,18 @@ export default function QuarterlySpotCheckForm() {
                                             onChange={(e) =>
                                                 handleFireExtinguisherChange(i, "expiry", e.target.value)
                                             }
+                                        />
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            className="w-full border px-1"
+                                            value={fe.quantity}
+                                            onChange={(e) =>
+                                                handleFireExtinguisherChange(i, "quantity", e.target.value)
+                                            }
+                                            placeholder="Quantity"
                                         />
                                     </td>
                                     <td className="border px-2 py-1">

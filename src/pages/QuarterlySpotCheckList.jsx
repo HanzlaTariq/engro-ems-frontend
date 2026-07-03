@@ -622,6 +622,7 @@ export default function QuarterlySpotCheckPrintView() {
                                 <tr>
                                     <th className="border border-black p-0.5">Last Refilling Date</th>
                                     <th className="border border-black p-0.5">Expiry Date</th>
+                                    <th className="border border-black p-0.5">Quantity</th>
                                     <th className="border border-black p-0.5">F.E gauge/Pressure</th>
                                     <th className="border border-black p-0.5">Nozzle Condition</th>
                                     <th className="border border-black p-0.5">F.E seal</th>
@@ -632,6 +633,7 @@ export default function QuarterlySpotCheckPrintView() {
                                     <tr key={i}>
                                         <td className="border border-black p-0.5">{formatDateDisplay(fe.lastRefill)}</td>
                                         <td className="border border-black p-0.5">{formatDateDisplay(fe.expiry)}</td>
+                                        <td className="border border-black p-0.5">{fe.quantity || ""}</td>
                                         <td className="border border-black p-0.5">{fe.pressure}</td>
                                         <td className="border border-black p-0.5">{fe.nozzle}</td>
                                         <td className="border border-black p-0.5">{fe.seal}</td>
