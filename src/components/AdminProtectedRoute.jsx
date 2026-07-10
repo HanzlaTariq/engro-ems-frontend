@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 const AdminProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
-  const isAdminLoggedIn = localStorage.getItem("adminToken");
+  const isAdminLoggedIn = sessionStorage.getItem("adminToken");
 
   const timeoutLimit = 5 * 60 * 1000;
 
@@ -16,7 +16,8 @@ const AdminProtectedRoute = ({ children }) => {
       clearTimeout(timeout);
 
       timeout = setTimeout(() => {
-        localStorage.removeItem("adminToken"); // logout
+        sessionStorage.removeItem("adminToken"); // logout
+        sessionStorage.removeItem("adminData");
         navigate("/admin/login"); // redirect
       }, timeoutLimit);
     };

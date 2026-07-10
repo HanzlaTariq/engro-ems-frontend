@@ -40,7 +40,7 @@ export default function AttendanceList() {
   // Fetch data – ✅ /my endpoint use karo
   const fetchAttendance = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         setError("Please login to view attendance.");
         return;
@@ -69,7 +69,7 @@ export default function AttendanceList() {
   // Edit save – ✅ Header add kar
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const saveData = {
         ...editFormData,
         date: new Date(editFormData.date).toISOString(),
@@ -106,7 +106,7 @@ export default function AttendanceList() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       await API.delete(`/api/attendance/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

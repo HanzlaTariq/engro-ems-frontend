@@ -16,7 +16,7 @@ console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL); // Add this
 API.interceptors.request.use(
   (config) => {
     // Admin token pehle, fir normal user token
-    const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
+    const token = sessionStorage.getItem("adminToken") || sessionStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
@@ -28,8 +28,10 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("adminToken");
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("adminToken");
+      sessionStorage.removeItem("adminData");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
       window.location.href = "/login"; // redirect to login
     }
     return Promise.reject(error);

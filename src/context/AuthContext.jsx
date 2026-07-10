@@ -5,11 +5,11 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
-      const u = localStorage.getItem("user");
+      const u = sessionStorage.getItem("user");
       return u ? JSON.parse(u) : null;
     } catch (err) {
-      console.error("❌ Failed to parse user from localStorage:", err);
-      localStorage.removeItem("user"); // corrupted data clear
+      console.error("❌ Failed to parse user from sessionStorage:", err);
+      sessionStorage.removeItem("user"); // corrupted data clear
       return null;
     }
   });
@@ -19,14 +19,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token, userObj) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userObj));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(userObj));
     setUser(userObj);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     setUser(null);
   };
 

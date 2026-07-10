@@ -186,7 +186,7 @@ export default function QuarterlySpotCheckForm() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       Swal.fire({
         icon: 'error',

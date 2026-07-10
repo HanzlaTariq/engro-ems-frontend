@@ -127,7 +127,7 @@ export default function SafetyTalkTruckerList() {
   const fetchRecords = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await API.get("/api/safety-talk-trucker/my", {
         // ✅ /my add kar
         headers: { Authorization: `Bearer ${token}` },
@@ -193,7 +193,7 @@ export default function SafetyTalkTruckerList() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const saveData = {
         ...editFormData,
         date: new Date(editFormData.date).toISOString(),

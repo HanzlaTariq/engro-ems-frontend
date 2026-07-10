@@ -220,7 +220,7 @@ export default function Dashboard() {
   // API fetching function
   const fetchData = async (url) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) return null;
 
       const res = await fetch(url, {
@@ -237,7 +237,7 @@ export default function Dashboard() {
   // Fetch all data
   useEffect(() => {
     const loadDashboardData = async () => {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) return;
 
       try {

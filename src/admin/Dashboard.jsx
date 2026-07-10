@@ -26,7 +26,7 @@ export default function Dashboard() {
   const fetchWarehouseData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("adminToken");
+      const token = sessionStorage.getItem("adminToken");
 
       const res = await API.get("/api/warehouses", {
         headers: { Authorization: `Bearer ${token}` }
@@ -45,7 +45,8 @@ export default function Dashboard() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminData");
     navigate("/admin/login");
   };
 

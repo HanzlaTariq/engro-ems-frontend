@@ -26,7 +26,7 @@ export default function PreNumberStationaryRecordList() {
   // Fetch records
   const fetchRecords = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await API.get("/api/pre-number-stationary-record/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -114,7 +114,7 @@ export default function PreNumberStationaryRecordList() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const saveData = {
         bookNo: editFormData.bookNo,
         receiptDate: editFormData.receiptDate

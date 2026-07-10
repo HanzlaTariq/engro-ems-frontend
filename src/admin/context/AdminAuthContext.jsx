@@ -7,8 +7,8 @@ export function AdminAuthProvider({ children }) {
   const [adminToken, setAdminToken] = useState(null); // Token state add
 
   useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminData");
-    const savedToken = localStorage.getItem("adminToken");
+    const savedAdmin = sessionStorage.getItem("adminData");
+    const savedToken = sessionStorage.getItem("adminToken");
     
 
     if (savedAdmin) {
@@ -25,16 +25,16 @@ export function AdminAuthProvider({ children }) {
       return;
     }
 
-    localStorage.setItem("adminData", JSON.stringify(adminData));
-    localStorage.setItem("adminToken", token);
+    sessionStorage.setItem("adminData", JSON.stringify(adminData));
+    sessionStorage.setItem("adminToken", token);
 
     setAdmin(adminData);
     setAdminToken(token);
   };
 
   const logoutAdmin = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminData");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminData");
     setAdmin(null);
     setAdminToken(null);
   };

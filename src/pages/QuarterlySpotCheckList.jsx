@@ -17,7 +17,7 @@ export default function QuarterlySpotCheckPrintView() {
     const fetchSpotChecks = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const response = await API.get("/api/quarterly-spot-check/my", {
                 headers: { Authorization: `Bearer ${token}` }
             });

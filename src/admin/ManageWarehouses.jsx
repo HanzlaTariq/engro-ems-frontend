@@ -32,7 +32,7 @@ export default function ManageWarehouses() {
 
   const getToken = () => {
     // Pehle adminToken check karo, fir token check karo
-    return localStorage.getItem("adminToken") || localStorage.getItem("token");
+    return sessionStorage.getItem("adminToken") || sessionStorage.getItem("token");
   };
 
   // Fetch warehouses

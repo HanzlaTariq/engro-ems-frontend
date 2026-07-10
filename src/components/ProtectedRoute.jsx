@@ -3,8 +3,8 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-  const inactivityTimeout = 1 * 60 * 1000;
+  const token = sessionStorage.getItem("token");
+  const inactivityTimeout = 5 * 60 * 1000;
 
   useEffect(() => {
     let timer;
@@ -12,7 +12,8 @@ const ProtectedRoute = ({ children }) => {
     const resetTimer = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        localStorage.removeItem("token"); // logout
+        sessionStorage.removeItem("token"); // logout
+        sessionStorage.removeItem("user");
         alert("Session expired due to inactivity");
         navigate("/login");
       }, inactivityTimeout);

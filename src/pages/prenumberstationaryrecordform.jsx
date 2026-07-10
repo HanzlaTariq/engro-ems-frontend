@@ -57,7 +57,7 @@ const handleSubmit = async (e) => {
   setIsLoading(true);
 
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       Swal.fire({
         icon: 'error',

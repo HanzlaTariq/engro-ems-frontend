@@ -16,7 +16,7 @@ export default function WeeklySpotCheckPrintView() {
     const fetchSpotChecks = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const response = await API.get("/api/spot-check/my", {
                 headers: { Authorization: `Bearer ${token}` }
             });

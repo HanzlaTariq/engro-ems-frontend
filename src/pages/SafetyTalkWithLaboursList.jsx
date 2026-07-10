@@ -40,7 +40,7 @@ export default function SafetyTalkList() {
   const fetchSafetyTalks = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await API.get("/api/safety-talk/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,7 +121,7 @@ export default function SafetyTalkList() {
 
   const handleSave = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const saveData = {
         ...editFormData,
         date: new Date(editFormData.date).toISOString(),
