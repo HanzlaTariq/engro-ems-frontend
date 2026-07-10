@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const inactivityTimeout = 5 * 60 * 1000;
+  const inactivityTimeout = 1 * 60 * 1000;
 
   useEffect(() => {
     let timer;
