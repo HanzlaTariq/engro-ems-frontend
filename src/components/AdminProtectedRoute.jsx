@@ -5,8 +5,7 @@ const AdminProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const isAdminLoggedIn = localStorage.getItem("adminToken");
 
-  // 2 minutes in milliseconds
-  const timeoutLimit = 2 * 60 * 10000;
+  const timeoutLimit = 5 * 60 * 1000;
 
   useEffect(() => {
     if (!isAdminLoggedIn) return;
