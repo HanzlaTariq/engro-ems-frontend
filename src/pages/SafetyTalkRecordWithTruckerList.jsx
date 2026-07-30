@@ -173,6 +173,10 @@ export default function SafetyTalkTruckerList() {
 
   // Edit handlers
   const handleEdit = (item) => {
+    if (item.doVerified === "Verified") {
+      alert("This record has been verified by DO and cannot be edited.");
+      return;
+    }
     setEditingId(item._id);
     setEditFormData({
       ...item,
@@ -742,6 +746,8 @@ export default function SafetyTalkTruckerList() {
                   <th className="px-4 py-4 text-left">Storage Location</th>
                   <th className="px-4 py-4 text-left">Plant Code</th>
                   <th className="px-4 py-4 text-left">Remarks</th>
+                  <th className="px-4 py-4 text-left">DO Verified</th>
+                  <th className="px-4 py-4 text-left">DO Email</th>
                   <th className="px-4 py-4 text-left actions">Actions</th>
                 </tr>
               </thead>
@@ -749,7 +755,7 @@ export default function SafetyTalkTruckerList() {
                 {filteredData.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="10"
+                      colSpan="12"
                       className="px-4 py-8 text-center text-gray-500"
                     >
                       <FiMessageSquare className="mx-auto text-4xl text-gray-300 mb-2" />
@@ -884,6 +890,16 @@ export default function SafetyTalkTruckerList() {
                           <span className="text-gray-600">{item.remarks}</span>
                         )}
                       </td>
+                      <td
+                        className={`px-4 py-3 font-semibold ${
+                          item.doVerified === "Verified"
+                            ? "text-green-600"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {item.doVerified || "DO Not Verified"}
+                      </td>
+                      <td className="px-4 py-3">{item.doEmail || "-"}</td>
                       <td className="px-4 py-3 actions">
                         {editingId === item._id ? (
                           <div className="flex gap-2">
@@ -902,6 +918,10 @@ export default function SafetyTalkTruckerList() {
                               <FiX className="text-sm" />
                             </button>
                           </div>
+                        ) : item.doVerified === "Verified" ? (
+                          <span className="text-green-600 font-semibold text-xs">
+                            ✔ Verified
+                          </span>
                         ) : (
                           <div className="flex gap-2">
                             <button
@@ -1063,6 +1083,20 @@ export default function SafetyTalkTruckerList() {
                     )}
                   </div>
 
+                  <div>
+                    <span className="font-medium block mb-1">DO Status:</span>
+                    <p
+                      className={`text-sm p-2 rounded-lg font-semibold ${
+                        item.doVerified === "Verified"
+                          ? "bg-green-50 text-green-600"
+                          : "bg-red-50 text-red-500"
+                      }`}
+                    >
+                      {item.doVerified || "DO Not Verified"}
+                      {item.doEmail ? ` (${item.doEmail})` : ""}
+                    </p>
+                  </div>
+
                   {editingId === item._id && (
                     <div className="space-y-2">
                       <div>
@@ -1117,6 +1151,10 @@ export default function SafetyTalkTruckerList() {
                         Cancel
                       </button>
                     </>
+                  ) : item.doVerified === "Verified" ? (
+                    <span className="flex-1 text-center text-green-600 font-semibold text-sm py-2">
+                      ✔ Verified
+                    </span>
                   ) : (
                     <>
                       <button

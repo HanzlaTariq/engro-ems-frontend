@@ -101,6 +101,10 @@ export default function SafetyTalkList() {
 
   // Edit Handlers
   const handleEdit = (item) => {
+    if (item.doVerified === "Verified") {
+      alert("This record has been verified by DO and cannot be edited.");
+      return;
+    }
     setEditingId(item._id);
     setEditFormData({
       ...item,
@@ -404,6 +408,8 @@ export default function SafetyTalkList() {
               <th className="px-2 py-1 border">Storage Location</th>
               <th className="px-2 py-1 border">Plant Code</th>
               <th className="px-2 py-1 border">Remarks</th>
+              <th className="px-2 py-1 border">DO Verified</th>
+              <th className="px-2 py-1 border">DO Email</th>
               <th className="px-2 py-1 border actions">Actions</th>
             </tr>
           </thead>
@@ -411,7 +417,7 @@ export default function SafetyTalkList() {
             {filteredData.length === 0 ? (
               <tr>
                 <td
-                  colSpan="11"
+                  colSpan="13"
                   className="text-center px-4 py-3 border text-gray-500"
                 >
                   No records found.
@@ -538,6 +544,16 @@ export default function SafetyTalkList() {
                       item.remarks
                     )}
                   </td>
+                  <td
+                    className={`px-3 py-1 border font-semibold ${
+                      item.doVerified === "Verified"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {item.doVerified || "DO Not Verified"}
+                  </td>
+                  <td className="px-3 py-1 border">{item.doEmail || "-"}</td>
                   <td className="px-3 py-1 border actions">
                     {editingId === item._id ? (
                       <div className="flex gap-2">
@@ -554,6 +570,10 @@ export default function SafetyTalkList() {
                           Cancel
                         </button>
                       </div>
+                    ) : item.doVerified === "Verified" ? (
+                      <span className="text-green-600 font-semibold text-sm">
+                        ✔ Verified
+                      </span>
                     ) : (
                       <button
                         onClick={() => handleEdit(item)}

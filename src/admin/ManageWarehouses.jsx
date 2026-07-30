@@ -78,6 +78,25 @@ export default function ManageWarehouses() {
     }));
   };
 
+  // Toggle Active / Inactive status
+  const toggleStatus = async (wh) => {
+    const newStatus = wh.status === "Inactive" ? "Active" : "Inactive";
+    try {
+      const token = getToken();
+      await api.put(
+        `/api/warehouses/${wh._id}`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setWarehouses((prev) =>
+        prev.map((w) => (w._id === wh._id ? { ...w, status: newStatus } : w))
+      );
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
   // Add warehouse
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -474,10 +493,23 @@ export default function ManageWarehouses() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              wh.status === "Inactive" ? "bg-gray-400" : "bg-green-500"
+                            }`}
+                          ></div>
                           <h3 className="text-lg font-semibold text-gray-800">
                             {wh.name}
                           </h3>
+                          <span
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                              wh.status === "Inactive"
+                                ? "bg-gray-100 text-gray-600"
+                                : "bg-green-100 text-green-700"
+                            }`}
+                          >
+                            {wh.status === "Inactive" ? "Inactive" : "Active"}
+                          </span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                           <div className="space-y-1">
@@ -517,6 +549,16 @@ export default function ManageWarehouses() {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <button
+                          onClick={() => toggleStatus(wh)}
+                          className={`px-4 py-2 rounded-lg font-medium shadow-sm transition-colors ${
+                            wh.status === "Inactive"
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-gray-500 text-white hover:bg-gray-600"
+                          }`}
+                        >
+                          {wh.status === "Inactive" ? "Mark Active" : "Mark Inactive"}
+                        </button>
                         <button
                           onClick={() => startEdit(wh)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"

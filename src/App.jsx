@@ -27,6 +27,9 @@ import ManageWarehouses from "./admin/ManageWarehouses";
 import User from "./admin/User";
 import ManageEmptyBagRecords from "./admin/ManageEmptyBagRecords";
 import ManagePreStationaryRecord from "./admin/managePreStationaryRecord";
+import ManageAttendance from "./admin/ManageAttendance";
+import ManageSafetyTalk from "./admin/ManageSafetyTalk";
+import ManageSafetyTalkTrucker from "./admin/ManageSafetyTalkTrucker";
 import WeeklyReports from "./admin/ManageWeeklySpotCheck";
 import QuarterlyReports from "./admin/ManageQuarterlySpotCheck";
 
@@ -205,6 +208,30 @@ export default function App() {
           element={
             <AdminProtectedRoute>
               <ManagePreStationaryRecord />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-attendance"
+          element={
+            <AdminProtectedRoute>
+              <ManageAttendance />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-safety-talk"
+          element={
+            <AdminProtectedRoute>
+              <ManageSafetyTalk />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-safety-talk-trucker"
+          element={
+            <AdminProtectedRoute>
+              <ManageSafetyTalkTrucker />
             </AdminProtectedRoute>
           }
         />

@@ -102,6 +102,11 @@ export default function AttendanceList() {
   
   // delete record
   const handleDelete = async (id) => {
+    const target = attendanceData.find((item) => item._id === id);
+    if (target?.doVerified === "Verified") {
+      alert("This record has been verified by DO and cannot be deleted.");
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this record?")) {
       return;
     }
@@ -150,6 +155,10 @@ export default function AttendanceList() {
 
   // Edit handlers
   const handleEdit = (item) => {
+    if (item.doVerified === "Verified") {
+      alert("This record has been verified by DO and cannot be edited.");
+      return;
+    }
     setEditingId(item._id);
     setEditFormData({
       ...item,
@@ -364,6 +373,8 @@ export default function AttendanceList() {
               <th className="px-4 py-3 border">Location</th>
               <th className="px-4 py-3 border">Plant Code</th>
               <th className="px-4 py-3 border">WHI Signature</th>
+              <th className="px-4 py-3 border">DO Verified</th>
+              <th className="px-4 py-3 border">DO Email</th>
               <th className="px-4 py-3 border actions">Actions</th>
             </tr>
           </thead>
@@ -371,7 +382,7 @@ export default function AttendanceList() {
             {filteredData.length === 0 ? (
               <tr>
                 <td
-                  colSpan="8"
+                  colSpan="10"
                   className="text-center px-4 py-3 border text-gray-500"
                 >
                   No records found.
@@ -492,6 +503,16 @@ export default function AttendanceList() {
                     )}
                   </td>
                   <td className="px-4 py-2 border">{item.whiSignature}</td>
+                  <td
+                    className={`px-4 py-2 border font-semibold ${
+                      item.doVerified === "Verified"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {item.doVerified || "DO Not Verified"}
+                  </td>
+                  <td className="px-4 py-2 border">{item.doEmail || "-"}</td>
                   <td className="px-4 py-2 border actions">
                     {editingId === item._id ? (
                       <>
@@ -508,6 +529,10 @@ export default function AttendanceList() {
                           Cancel
                         </button>
                       </>
+                    ) : item.doVerified === "Verified" ? (
+                      <span className="text-green-600 font-semibold text-sm">
+                        ✔ Verified
+                      </span>
                     ) : (
                       <>
                       <button
