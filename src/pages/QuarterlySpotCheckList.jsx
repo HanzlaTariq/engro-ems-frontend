@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "../api/axios.jsx";
 
 export default function QuarterlySpotCheckPrintView() {
+    const navigate = useNavigate();
     const [spotChecks, setSpotChecks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCheck, setSelectedCheck] = useState(null);
@@ -357,8 +359,22 @@ export default function QuarterlySpotCheckPrintView() {
                                                             <div className="font-medium text-gray-800">{selectedCheck.plantCode || "-"}</div>
                                                         </div>
                                                         <div>
-                                                            <label className="block text-xs text-gray-500 mb-1">Verified By</label>
-                                                            <div className="font-medium text-gray-800">{selectedCheck.doEmail}</div>
+                                                            <label className="block text-xs text-gray-500 mb-1">Verification Status</label>
+                                                            {selectedCheck.verifiedBy === "Verified" ? (
+                                                                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                                                                    <p className="text-sm font-semibold text-green-700">Verified</p>
+                                                                    <p className="text-xs text-gray-600 mt-0.5">{selectedCheck.doEmail}</p>
+                                                                    {selectedCheck.doVerifiedAt && (
+                                                                        <p className="text-xs text-gray-500 mt-0.5">
+                                                                            on {formatDate(selectedCheck.doVerifiedAt).fullDate}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                                                    <p className="text-sm font-semibold text-red-600">DO Not Verified</p>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <div>
@@ -376,6 +392,17 @@ export default function QuarterlySpotCheckPrintView() {
                                                 <div className="bg-white/50 rounded-xl p-4">
                                                     <h4 className="font-semibold text-gray-700 mb-3">Actions</h4>
                                                     <div className="space-y-2">
+                                                        {selectedCheck.verifiedBy !== "Verified" && (
+                                                            <button
+                                                                onClick={() => navigate(`/quarterly-spot-check/edit/${selectedCheck._id}`)}
+                                                                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-3 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                                            >
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                                <span>Edit Record</span>
+                                                            </button>
+                                                        )}
                                                         <button
                                                             onClick={handlePrint}
                                                             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
@@ -429,6 +456,15 @@ export default function QuarterlySpotCheckPrintView() {
                             }
                             td, th {
                                 padding: 2px 3px !important;
+                                color: #000 !important;
+                                -webkit-font-smoothing: antialiased;
+                                text-rendering: optimizeLegibility;
+                            }
+                            th {
+                                font-weight: 700 !important;
+                            }
+                            td {
+                                font-weight: 500 !important;
                             }
                             .print-section {
                                 page-break-after: avoid;
@@ -442,6 +478,7 @@ export default function QuarterlySpotCheckPrintView() {
                             }
                             p {
                                 margin: 1px 0 !important;
+                                color: #000 !important;
                             }
                             .border-b-4 {
                                 padding: 1px 0 !important;
@@ -451,7 +488,7 @@ export default function QuarterlySpotCheckPrintView() {
                     `}</style>
 
                     {/* Header */}
-                    <div className="border-b-2 border-black pb-0.5 mb-1 flex justify-between items-center">
+                    <div className="border-b-2 border-gray-400 pb-0.5 mb-1 flex justify-between items-center">
                         <div>
                             <h1 className="text-base font-bold">
                                 Quarterly Spot Check {formatDate(selectedCheck.date).day}/{formatDate(selectedCheck.date).month}/{formatDate(selectedCheck.date).year.toString().slice(-2)}
@@ -462,31 +499,29 @@ export default function QuarterlySpotCheckPrintView() {
 
                     {/* Date Section */}
                     <div className="mb-1">
-                        <p><strong>Date:</strong> _________________</p>
-                        <p><strong>As per WMS Dated:</strong> _________________</p>
                         <p><strong>Storage Location:</strong> {selectedCheck.storageLocation || "-"}</p>
                         <p><strong>Plant Code:</strong> {selectedCheck.plantCode || "-"}</p>
                     </div>
 
                     {/* Stock Table */}
-                    <table className="w-full border-collapse border border-black mb-1" style={{ fontSize: '6px' }}>
+                    <table className="w-full border-collapse border border-gray-400 mb-1" style={{ fontSize: '6px' }}>
                         <thead>
                             <tr>
-                                <th className="border border-black p-0.5 text-left w-32">Item</th>
-                                <th className="border border-black p-0.5">STR QTY (TONS)</th>
-                                <th className="border border-black p-0.5">Physical Count (TONS)</th>
-                                <th className="border border-black p-0.5">Loose Product (KG)</th>
-                                <th className="border border-black p-0.5">Remarks</th>
+                                <th className="border border-gray-400 p-0.5 text-left w-32">Item</th>
+                                <th className="border border-gray-400 p-0.5">STR QTY (TONS)</th>
+                                <th className="border border-gray-400 p-0.5">Physical Count (TONS)</th>
+                                <th className="border border-gray-400 p-0.5">Loose Product (KG)</th>
+                                <th className="border border-gray-400 p-0.5">Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
                             {selectedCheck.stocks?.map((stock, i) => (
                                 <tr key={i}>
-                                    <td className="border border-black p-0.5">{stock.item}</td>
-                                    <td className="border border-black p-0.5">{stock.sitQty}</td>
-                                    <td className="border border-black p-0.5">{stock.physicalCount}</td>
-                                    <td className="border border-black p-0.5">{stock.looseProduct}</td>
-                                    <td className="border border-black p-0.5">{stock.remarks}</td>
+                                    <td className="border border-gray-400 p-0.5">{stock.item}</td>
+                                    <td className="border border-gray-400 p-0.5">{stock.sitQty}</td>
+                                    <td className="border border-gray-400 p-0.5">{stock.physicalCount}</td>
+                                    <td className="border border-gray-400 p-0.5">{stock.looseProduct}</td>
+                                    <td className="border border-gray-400 p-0.5">{stock.remarks}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -495,30 +530,30 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* ELCB */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">ELCB:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5 w-20">Detail</th>
-                                    <th className="border border-black p-0.5">Month</th>
-                                    <th className="border border-black p-0.5">WHI</th>
-                                    <th className="border border-black p-0.5">Electrician</th>
-                                    <th className="border border-black p-0.5">Comments</th>
+                                    <th className="border border-gray-400 p-0.5 w-20">Detail</th>
+                                    <th className="border border-gray-400 p-0.5">Month</th>
+                                    <th className="border border-gray-400 p-0.5">WHI</th>
+                                    <th className="border border-gray-400 p-0.5">Electrician</th>
+                                    <th className="border border-gray-400 p-0.5">Comments</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5">Weekly</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.weekly?.month}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.weekly?.whi}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.weekly?.electrician}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.weekly?.comment}</td>
+                                    <td className="border border-gray-400 p-0.5">Weekly</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.month}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.whi}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.electrician}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.comment}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5">Quarterly</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.quarterly?.month}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.quarterly?.whi}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.quarterly?.electrician}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.elcb?.quarterly?.comment}</td>
+                                    <td className="border border-gray-400 p-0.5">Quarterly</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.month}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.whi}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.electrician}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.comment}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -527,25 +562,25 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Earthing Health */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Earthing Health:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5 w-20">Detail</th>
-                                    <th className="border border-black p-0.5">Month</th>
-                                    <th className="border border-black p-0.5">Ohm</th>
-                                    <th className="border border-black p-0.5">Electrician</th>
-                                    <th className="border border-black p-0.5">Stamp/Signature</th>
-                                    <th className="border border-black p-0.5">Comments</th>
+                                    <th className="border border-gray-400 p-0.5 w-20">Detail</th>
+                                    <th className="border border-gray-400 p-0.5">Month</th>
+                                    <th className="border border-gray-400 p-0.5">Ohm</th>
+                                    <th className="border border-gray-400 p-0.5">Electrician</th>
+                                    <th className="border border-gray-400 p-0.5">Stamp/Signature</th>
+                                    <th className="border border-gray-400 p-0.5">Comments</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5">Quarterly</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.earthingHealth?.month}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.earthingHealth?.ohm}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.earthingHealth?.electrician}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.earthingHealth?.stamp}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.earthingHealth?.comment}</td>
+                                    <td className="border border-gray-400 p-0.5">Quarterly</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.month}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.ohm}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.electrician}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.stamp}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.comment}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -554,25 +589,25 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Stitching Machine */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Stitching Machine:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5 w-32 font-semibold">Condition:</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.condition}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.conditionRemark}</td>
+                                    <td className="border border-gray-400 p-0.5 w-32 font-semibold">Condition:</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.condition}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.conditionRemark}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Cord:</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.cord}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.cordRemark}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Cord:</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.cord}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.cordRemark}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Oil:</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.oil}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.stitchingMachine?.oilRemark}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Oil:</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.oil}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.stitchingMachine?.oilRemark}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -581,13 +616,13 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Digital Weighing Scale */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Digital Weighing Scale:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5 w-32 font-semibold">Condition</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.weighingScale?.condition}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.weighingScale?.remarks}</td>
+                                    <td className="border border-gray-400 p-0.5 w-32 font-semibold">Condition</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.weighingScale?.condition}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.weighingScale?.remarks}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -596,19 +631,19 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* UPS/Battery */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">UPS/Battery:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5 w-32 font-semibold">Charging:</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.upsBattery?.charging}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.upsBattery?.chargingRemarks}</td>
+                                    <td className="border border-gray-400 p-0.5 w-32 font-semibold">Charging:</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.upsBattery?.charging}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.upsBattery?.chargingRemarks}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Condition:</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.upsBattery?.condition}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.upsBattery?.conditionRemarks}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Condition:</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.upsBattery?.condition}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.upsBattery?.conditionRemarks}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -617,26 +652,26 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Fire Extinguishers */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Fire Extinguishers:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5">Last Refilling Date</th>
-                                    <th className="border border-black p-0.5">Expiry Date</th>
-                                    <th className="border border-black p-0.5">Quantity</th>
-                                    <th className="border border-black p-0.5">F.E gauge/Pressure</th>
-                                    <th className="border border-black p-0.5">Nozzle Condition</th>
-                                    <th className="border border-black p-0.5">F.E seal</th>
+                                    <th className="border border-gray-400 p-0.5">Last Refilling Date</th>
+                                    <th className="border border-gray-400 p-0.5">Expiry Date</th>
+                                    <th className="border border-gray-400 p-0.5">Quantity</th>
+                                    <th className="border border-gray-400 p-0.5">F.E gauge/Pressure</th>
+                                    <th className="border border-gray-400 p-0.5">Nozzle Condition</th>
+                                    <th className="border border-gray-400 p-0.5">F.E seal</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {selectedCheck.fireExtinguishers?.map((fe, i) => (
                                     <tr key={i}>
-                                        <td className="border border-black p-0.5">{formatDateDisplay(fe.lastRefill)}</td>
-                                        <td className="border border-black p-0.5">{formatDateDisplay(fe.expiry)}</td>
-                                        <td className="border border-black p-0.5">{fe.quantity || ""}</td>
-                                        <td className="border border-black p-0.5">{fe.pressure}</td>
-                                        <td className="border border-black p-0.5">{fe.nozzle}</td>
-                                        <td className="border border-black p-0.5">{fe.seal}</td>
+                                        <td className="border border-gray-400 p-0.5">{formatDateDisplay(fe.lastRefill)}</td>
+                                        <td className="border border-gray-400 p-0.5">{formatDateDisplay(fe.expiry)}</td>
+                                        <td className="border border-gray-400 p-0.5">{fe.quantity || ""}</td>
+                                        <td className="border border-gray-400 p-0.5">{fe.pressure}</td>
+                                        <td className="border border-gray-400 p-0.5">{fe.nozzle}</td>
+                                        <td className="border border-gray-400 p-0.5">{fe.seal}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -646,27 +681,27 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Government Certificates */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Government Certificates:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5">Certificate</th>
-                                    <th className="border border-black p-0.5">From</th>
-                                    <th className="border border-black p-0.5">To</th>
-                                    <th className="border border-black p-0.5">Reminder Date</th>
+                                    <th className="border border-gray-400 p-0.5">Certificate</th>
+                                    <th className="border border-gray-400 p-0.5">From</th>
+                                    <th className="border border-gray-400 p-0.5">To</th>
+                                    <th className="border border-gray-400 p-0.5">Reminder Date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5">Weighing Scale</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.from)}</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.to)}</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.reminderDate)}</td>
+                                    <td className="border border-gray-400 p-0.5">Weighing Scale</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.from)}</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.to)}</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.weighingScale?.reminderDate)}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5">Warehouse Reg</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.from)}</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.to)}</td>
-                                    <td className="border border-black p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.reminderDate)}</td>
+                                    <td className="border border-gray-400 p-0.5">Warehouse Reg</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.from)}</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.to)}</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.govtCertificate?.warehouseReg?.reminderDate)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -675,29 +710,29 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Warehouse Area & Expiry */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Warehouse Area & Expiry:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Permanent (sqft)</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.permanentSqft}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.remarksSqft}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Permanent (sqft)</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.permanentSqft}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.remarksSqft}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Temporary (sqft)</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.temporarySqft}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.remarksSqft}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Temporary (sqft)</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.temporarySqft}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.remarksSqft}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Permanent Expiry</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.permanentExpiry}</td>
-                                    <td className="border border-black p-0.5 font-semibold">Temporary Expiry</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.warehouseAgreement?.temporaryExpiry}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Permanent Expiry</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.permanentExpiry}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Temporary Expiry</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.temporaryExpiry}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-black p-0.5 font-semibold">Expiry Remarks</td>
-                                    <td className="border border-black p-0.5" colSpan={3}>{selectedCheck.warehouseAgreement?.remarksExpiry}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Expiry Remarks</td>
+                                    <td className="border border-gray-400 p-0.5" colSpan={3}>{selectedCheck.warehouseAgreement?.remarksExpiry}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -706,14 +741,14 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Safety Ramp */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Safety Ramp:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5 text-left w-2/5">Safety Ramp Details</th>
-                                    <th className="border border-black p-0.5">Frequency</th>
-                                    <th className="border border-black p-0.5">Poor</th>
-                                    <th className="border border-black p-0.5">Good</th>
-                                    <th className="border border-black p-0.5">Remarks</th>
+                                    <th className="border border-gray-400 p-0.5 text-left w-2/5">Safety Ramp Details</th>
+                                    <th className="border border-gray-400 p-0.5">Frequency</th>
+                                    <th className="border border-gray-400 p-0.5">Poor</th>
+                                    <th className="border border-gray-400 p-0.5">Good</th>
+                                    <th className="border border-gray-400 p-0.5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -725,11 +760,11 @@ export default function QuarterlySpotCheckPrintView() {
                                     "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
                                 ].map((text, i) => (
                                     <tr key={i}>
-                                        <td className="border border-black p-0.5 text-[8px]">{text}</td>
-                                        <td className="border border-black p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.frequently || ''}</td>
-                                        <td className="border border-black p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-black p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-black p-0.5 ">{selectedCheck.safetyRamp?.[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-[8px]">{text}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.frequently || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 ">{selectedCheck.safetyRamp?.[i]?.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -739,14 +774,14 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* SRL / Harness */}
                     <div className="mb-1">
                         <p className="font-bold mb-0.5 text-xs">SRL / Harness:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5 text-left w-2/5">SRL / Harness Details</th>
-                                    <th className="border border-black p-0.5">Frequency</th>
-                                    <th className="border border-black p-0.5">Poor</th>
-                                    <th className="border border-black p-0.5">Good</th>
-                                    <th className="border border-black p-0.5">Remarks</th>
+                                    <th className="border border-gray-400 p-0.5 text-left w-2/5">SRL / Harness Details</th>
+                                    <th className="border border-gray-400 p-0.5">Frequency</th>
+                                    <th className="border border-gray-400 p-0.5">Poor</th>
+                                    <th className="border border-gray-400 p-0.5">Good</th>
+                                    <th className="border border-gray-400 p-0.5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -761,11 +796,11 @@ export default function QuarterlySpotCheckPrintView() {
                                     freq: i < 3 ? "Monthly" : "Quarterly"
                                 })).map((item, i) => (
                                     <tr key={i}>
-                                        <td className="border border-black p-0.5 text-[8px]">{item.text}</td>
-                                        <td className="border border-black p-0.5 text-center">{item.freq}</td>
-                                        <td className="border border-black p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-black p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-black p-0.5">{selectedCheck.srlHarness?.[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-[8px]">{item.text}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{item.freq}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5">{selectedCheck.srlHarness?.[i]?.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -775,29 +810,29 @@ export default function QuarterlySpotCheckPrintView() {
                     {/* Emergency Numbers */}
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Emergency Number Check:</p>
-                        <table className="w-full border-collapse border border-black" style={{ fontSize: '5.5px' }}>
+                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-black p-0.5">Fire Brigade</th>
-                                    <th className="border border-black p-0.5">Rescue</th>
-                                    <th className="border border-black p-0.5">Civil Defense</th>
-                                    <th className="border border-black p-0.5">Bomb Disposal</th>
-                                    <th className="border border-black p-0.5">Nearest Hospital</th>
-                                    <th className="border border-black p-0.5">Police Station</th>
-                                    <th className="border border-black p-0.5">District Hospital</th>
-                                    <th className="border border-black p-0.5">Edhi</th>
+                                    <th className="border border-gray-400 p-0.5">Fire Brigade</th>
+                                    <th className="border border-gray-400 p-0.5">Rescue</th>
+                                    <th className="border border-gray-400 p-0.5">Civil Defense</th>
+                                    <th className="border border-gray-400 p-0.5">Bomb Disposal</th>
+                                    <th className="border border-gray-400 p-0.5">Nearest Hospital</th>
+                                    <th className="border border-gray-400 p-0.5">Police Station</th>
+                                    <th className="border border-gray-400 p-0.5">District Hospital</th>
+                                    <th className="border border-gray-400 p-0.5">Edhi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.fireBrigade || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.rescue || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.civilDefense || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.bombDisposal || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.nearestHospital || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.policeStation || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.districtHospital || ''}</td>
-                                    <td className="border border-black p-0.5">{selectedCheck.emergencyNumbers?.edhi || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.fireBrigade || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.rescue || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.civilDefense || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.bombDisposal || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.nearestHospital || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.policeStation || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.districtHospital || ''}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.emergencyNumbers?.edhi || ''}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -809,12 +844,15 @@ export default function QuarterlySpotCheckPrintView() {
                     </div>
 
                     {/* Footer Signatures */}
-                    <div className="flex justify-between mt-1 pt-1 border-t border-black" style={{ fontSize: '5.5px' }}>
+                    <div className="flex justify-between mt-1 pt-1 border-t border-gray-400" style={{ fontSize: '5.5px' }}>
                         <div>
                             <p><strong>Warehouse Incharge:</strong> {selectedCheck.warehouseIncharge}</p>
                         </div>
                         <div className="text-right">
                             <p><strong>Verified By:</strong> {selectedCheck.doEmail}</p>
+                            {selectedCheck.doVerifiedAt && (
+                                <p>{formatDate(selectedCheck.doVerifiedAt).fullDate}</p>
+                            )}
                         </div>
                     </div>
 

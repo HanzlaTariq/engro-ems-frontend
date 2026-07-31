@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import API from "../api/axios.jsx";
 export default function WeeklySpotCheckForm() {
-    const { user } = React.useContext(AuthContext);    
+    const { user } = React.useContext(AuthContext);
+    const { id } = useParams();
+    const isEditMode = !!id;
+    const navigate = useNavigate();
+    const [loadingRecord, setLoadingRecord] = useState(isEditMode);    
     const [form, setForm] = useState({
         date: new Date().toISOString().split("T")[0],
         storageLocation: "",
@@ -97,6 +102,93 @@ export default function WeeklySpotCheckForm() {
 
         remarks: "",
     });
+
+    // Helper: convert an ISO date string to yyyy-mm-dd for <input type="date">
+    const toDateInput = (val) => (val ? new Date(val).toISOString().split("T")[0] : "");
+
+    // Edit mode: fetch existing record and prefill the form
+    useEffect(() => {
+        if (!isEditMode) return;
+
+        const fetchRecord = async () => {
+            try {
+                const token = sessionStorage.getItem("token");
+                const res = await API.get(`/api/spot-check/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const rec = res.data.data;
+
+                if (rec.verifiedBy === "Verified") {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Already Verified",
+                        text: "This record has been verified by DO and can no longer be edited.",
+                    });
+                    navigate("/weekly-spot-check-list");
+                    return;
+                }
+
+                setForm({
+                    date: toDateInput(rec.date),
+                    storageLocation: rec.storageLocation || "",
+                    plantCode: rec.plantCode || "",
+                    stocks: rec.stocks?.length ? rec.stocks : form.stocks,
+                    elcb: rec.elcb || form.elcb,
+                    earthingHealth: rec.earthingHealth || form.earthingHealth,
+                    stitchingMachine: rec.stitchingMachine || form.stitchingMachine,
+                    weighingScale: rec.weighingScale || form.weighingScale,
+                    upsBattery: rec.upsBattery || form.upsBattery,
+                    warehouseAgreement: {
+                        permanentSqft: rec.warehouseAgreement?.permanentSqft || "",
+                        temporarySqft: rec.warehouseAgreement?.temporarySqft || "",
+                        remarksSqft: rec.warehouseAgreement?.remarksSqft || "",
+                        permanentExpiry: toDateInput(rec.warehouseAgreement?.permanentExpiry),
+                        temporaryExpiry: toDateInput(rec.warehouseAgreement?.temporaryExpiry),
+                        remarksExpiry: rec.warehouseAgreement?.remarksExpiry || "",
+                    },
+                    govtCertificate: {
+                        weighingScale: {
+                            from: toDateInput(rec.govtCertificate?.weighingScale?.from),
+                            to: toDateInput(rec.govtCertificate?.weighingScale?.to),
+                            reminderDate: toDateInput(rec.govtCertificate?.weighingScale?.reminderDate),
+                        },
+                        warehouseReg: {
+                            from: toDateInput(rec.govtCertificate?.warehouseReg?.from),
+                            to: toDateInput(rec.govtCertificate?.warehouseReg?.to),
+                            reminderDate: toDateInput(rec.govtCertificate?.warehouseReg?.reminderDate),
+                        },
+                    },
+                    fireExtinguishers: rec.fireExtinguishers?.length
+                        ? rec.fireExtinguishers.map((f) => ({
+                              ...f,
+                              lastRefill: toDateInput(f.lastRefill),
+                              expiry: toDateInput(f.expiry),
+                          }))
+                        : form.fireExtinguishers,
+                    safetyRamp: rec.safetyRamp?.length ? rec.safetyRamp : form.safetyRamp,
+                    srlHarness: rec.srlHarness?.length ? rec.srlHarness : form.srlHarness,
+                    emergencyNumbers: rec.emergencyNumbers || form.emergencyNumbers,
+                    medicine: rec.medicine || "",
+                    warehouseIncharge: rec.warehouseIncharge || user?.name || "",
+                    verifiedBy: rec.verifiedBy || "DO Not Verified",
+                    remarks: rec.remarks || "",
+                });
+            } catch (err) {
+                console.error("Fetch record error:", err);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: err.response?.data?.message || "Failed to load record for editing",
+                });
+                navigate("/weekly-spot-check-list");
+            } finally {
+                setLoadingRecord(false);
+            }
+        };
+
+        fetchRecord();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     // Helper for stock change
     const handleStockChange = (index, key, value) => {
@@ -197,17 +289,23 @@ export default function WeeklySpotCheckForm() {
       return;
     }
 
-    await API.post("/api/spot-check", form, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await (isEditMode
+      ? API.put(`/api/spot-check/${id}`, form, { headers: { Authorization: `Bearer ${token}` } })
+      : API.post("/api/spot-check", form, { headers: { Authorization: `Bearer ${token}` } }));
 
     Swal.fire({
       icon: 'success',
-      title: 'Saved!',
-      text: 'Weekly Spot Check saved successfully!',
+      title: isEditMode ? 'Updated!' : 'Saved!',
+      text: isEditMode
+        ? 'Weekly Spot Check updated successfully!'
+        : 'Weekly Spot Check saved successfully!',
       timer: 2000,
       showConfirmButton: false,
     });
+
+    if (isEditMode) {
+      navigate("/weekly-spot-check-list");
+    }
 
   } catch (err) {
     console.error("❌ Error saving", err.response?.data || err.message);
@@ -222,6 +320,11 @@ export default function WeeklySpotCheckForm() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+            {loadingRecord ? (
+                <div className="bg-white rounded-lg shadow p-10 text-center text-gray-600">
+                    Loading record...
+                </div>
+            ) : (
             <form
                 onSubmit={handleSubmit}
                 className="bg-white shadow-lg rounded-xl p-6 w-full max-w-6xl"
@@ -1247,9 +1350,10 @@ export default function WeeklySpotCheckForm() {
                     type="submit"
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-md mt-6 hover:bg-blue-700"
                 >
-                    Save Spot Check
+                    {isEditMode ? "Update Spot Check" : "Save Spot Check"}
                 </button>
             </form>
+            )}
         </div>
     );
 }

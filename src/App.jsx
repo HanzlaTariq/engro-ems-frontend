@@ -126,6 +126,14 @@ export default function App() {
           }
         />
         <Route
+          path="/weekly-spot-check/edit/:id"
+          element={
+            <ProtectedRoute>
+              <WeeklySpotCheckForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/weekly-spot-check-list"
           element={
             <ProtectedRoute>
@@ -135,6 +143,14 @@ export default function App() {
         />
         <Route
           path="/quarterly-spot-check"
+          element={
+            <ProtectedRoute>
+              <QuarterlySpotCheckForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quarterly-spot-check/edit/:id"
           element={
             <ProtectedRoute>
               <QuarterlySpotCheckForm />
