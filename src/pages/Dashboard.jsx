@@ -242,156 +242,186 @@ export default function Dashboard() {
       if (!token) return;
 
       try {
-        // Fetch attendance
-        const attendanceRes = await API.get("/api/attendance/my?page=1&limit=1000").then(res => res.data);
+        const todayStr = new Date().toISOString().split("T")[0];
 
-        if (attendanceRes?.attendances) {
-          const todayStr = new Date().toISOString().split("T")[0];
-          const todayRecord = attendanceRes.attendances.find(
-            (item) => item.date?.slice(0, 10) === todayStr
-          );
-          setDashboardData(prev => ({
-            ...prev,
-            attendanceToday: todayRecord ? "Present" : "Absent",
-            todayDetails: todayRecord || null,
-          }));
-        }
+        // 🚀 Fire all requests at once instead of awaiting them one by one —
+        // this is what was making the dashboard take 10-12s to load (6
+        // sequential round trips instead of 1 parallel batch).
+        // Promise.allSettled so a single failed call never blocks the rest.
+        const [
+          attendanceResult,
+          safetyTalksResult,
+          emptyBagResult,
+          preNumberResult,
+          spotCheckResult,
+          quarterlyResult,
+        ] = await Promise.allSettled([
+          API.get("/api/attendance/my?page=1&limit=1000").then(res => res.data),
+          API.get("/api/safety-talk/my").then(res => res.data),
+          API.get("/api/empty-bag-record/my").then(res => res.data),
+          API.get("/api/pre-number-stationary-record/my").then(res => res.data),
+          API.get("/api/spot-check/my").then(res => res.data),
+          API.get("/api/quarterly-spot-check/my").then(res => res.data),
+        ]);
 
-        // Fetch safety talks
-        const safetyTalksRes = await API.get("/api/safety-talk/my").then(res => res.data);
-
-        if (safetyTalksRes) {
-          const talks = safetyTalksRes.records || safetyTalksRes;
-          const todayStr = new Date().toISOString().split("T")[0];
-          const todayTalks = Array.isArray(talks) ? talks.filter(t => t.date?.slice(0, 10) === todayStr) : [];
-          setDashboardData(prev => ({
-            ...prev,
-            safetyTalksToday: todayTalks.length,
-            todaySafetyTalks: todayTalks,
-          }));
-        }
-
-        // Fetch empty bag records
-       const emptyBagRes = await API.get("/api/empty-bag-record/my").then(res => res.data);
-
-        if (emptyBagRes) {
-          const records = emptyBagRes.records || emptyBagRes.data || (Array.isArray(emptyBagRes) ? emptyBagRes : []);
-          const todayStr = new Date().toISOString().split("T")[0];
-          const todayRecords = Array.isArray(records) ? records.filter(r => r.date?.slice(0, 10) === todayStr) : [];
-          const totalBalance = todayRecords.reduce((sum, r) => sum + (r.balanceQty || 0), 0);
-          setDashboardData(prev => ({
-            ...prev,
-            emptyBagRecords: todayRecords,
-            emptyBagTotalToday: todayRecords.length,
-            totalBalanceQty: totalBalance,
-            latestEmptyBagRecord: todayRecords[todayRecords.length - 1] || null,
-          }));
-        }
-
-        // Fetch pre-number records
-        const preNumberRes = await API.get("/api/pre-number-stationary-record/my").then(res => res.data);
-
-        if (preNumberRes) {
-          const records = preNumberRes.records || preNumberRes.data || (Array.isArray(preNumberRes) ? preNumberRes : []);
-          const todayStr = new Date().toISOString().split("T")[0];
-          const todayRecords = Array.isArray(records) ? records.filter(r => r.startDate?.slice(0, 10) === todayStr) : [];
-          setDashboardData(prev => ({
-            ...prev,
-            preNumberRecords: todayRecords,
-            preNumberTotalToday: todayRecords.length,
-            latestPreNumberRecord: todayRecords[todayRecords.length - 1] || null,
-          }));
-        }
-
-        // Fetch weekly spot checks
-        const spotCheckRes = await API.get("/api/spot-check/my").then(res => res.data);
-
-        
-        if (spotCheckRes) {
-          let records = [];
-          
-          // Handle different API response structures
-          if (spotCheckRes.data && Array.isArray(spotCheckRes.data)) {
-            records = spotCheckRes.data;
-          } else if (spotCheckRes.records && Array.isArray(spotCheckRes.records)) {
-            records = spotCheckRes.records;
-          } else if (Array.isArray(spotCheckRes)) {
-            records = spotCheckRes;
+        // Attendance
+        if (attendanceResult.status === "fulfilled") {
+          const attendanceRes = attendanceResult.value;
+          if (attendanceRes?.attendances) {
+            const todayRecord = attendanceRes.attendances.find(
+              (item) => item.date?.slice(0, 10) === todayStr
+            );
+            setDashboardData(prev => ({
+              ...prev,
+              attendanceToday: todayRecord ? "Present" : "Absent",
+              todayDetails: todayRecord || null,
+            }));
           }
-          
-          // Sort by date descending (newest first)
-          const sortedRecords = records.sort((a, b) => 
-            new Date(b.date) - new Date(a.date)
-          );
-          
-          const latestRecord = sortedRecords[0] || null;
-          const equipmentStatus = calculateEquipmentStatus(latestRecord);
-          
-          // Check if weekly spot check is due
-          const dueCheck = checkSpotCheckDue(latestRecord?.date);
-          setSpotCheckAlert(dueCheck);
-          
-          setDashboardData(prev => ({
-            ...prev,
-            spotCheckRecords: sortedRecords,
-            spotCheckTotalThisWeek: sortedRecords.filter(r => {
-              if (!r.date) return false;
-              const recordDate = new Date(r.date);
-              const sevenDaysAgo = new Date();
-              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-              return recordDate >= sevenDaysAgo;
-            }).length,
-            latestSpotCheckRecord: latestRecord,
-            spotCheckStatus: sortedRecords.length > 0 ? "Completed" : "Pending",
-            equipmentStatus: equipmentStatus,
-            lastSpotCheckDate: latestRecord?.date,
-          }));
+        } else {
+          console.error("Error loading attendance:", attendanceResult.reason);
         }
 
-        // Fetch quarterly spot checks
-       const quarterlyRes = await API.get("/api/quarterly-spot-check/my").then(res => res.data);
-
-        console.log("Quarterly API Response:", quarterlyRes); // Debug log
-        
-        if (quarterlyRes) {
-          let records = [];
-          
-          if (quarterlyRes.data && Array.isArray(quarterlyRes.data)) {
-            records = quarterlyRes.data;
-          } else if (quarterlyRes.records && Array.isArray(quarterlyRes.records)) {
-            records = quarterlyRes.records;
-          } else if (Array.isArray(quarterlyRes)) {
-            records = quarterlyRes;
+        // Safety talks
+        if (safetyTalksResult.status === "fulfilled") {
+          const safetyTalksRes = safetyTalksResult.value;
+          if (safetyTalksRes) {
+            const talks = safetyTalksRes.records || safetyTalksRes;
+            const todayTalks = Array.isArray(talks) ? talks.filter(t => t.date?.slice(0, 10) === todayStr) : [];
+            setDashboardData(prev => ({
+              ...prev,
+              safetyTalksToday: todayTalks.length,
+              todaySafetyTalks: todayTalks,
+            }));
           }
-          
-          console.log("Processed Quarterly Records:", records); // Debug log
-          
-          const sortedQuarterly = records.sort((a, b) => 
-            new Date(b.date) - new Date(a.date)
-          );
-          const latestQuarterly = sortedQuarterly[0] || null;
-          const quarterlyEquipmentStatus = calculateEquipmentStatus(latestQuarterly);
-          
-          // Check if quarterly spot check is due
-          const quarterlyDueCheck = checkQuarterlySpotCheckDue(latestQuarterly?.date);
-          setQuarterlySpotCheckAlert(quarterlyDueCheck);
-          
-          setDashboardData(prev => ({
-            ...prev,
-            quarterlySpotCheckRecords: sortedQuarterly,
-            quarterlySpotCheckTotal: sortedQuarterly.filter(r => {
-              if (!r.date) return false;
-              const recordDate = new Date(r.date);
-              const forteen = new Date();
-              forteen.setDate(forteen.getDate() - 14);
-              return recordDate >= forteen;
-            }).length,
-            latestQuarterlySpotCheckRecord: latestQuarterly || null,
-            quarterlySpotCheckStatus: sortedQuarterly.length > 0 ? "Completed" : "Pending",
-            quarterlyEquipmentStatus: quarterlyEquipmentStatus,
-            lastQuarterlySpotCheckDate: latestQuarterly?.date,
-            loading: false,
-          }));
+        } else {
+          console.error("Error loading safety talks:", safetyTalksResult.reason);
+        }
+
+        // Empty bag records
+        if (emptyBagResult.status === "fulfilled") {
+          const emptyBagRes = emptyBagResult.value;
+          if (emptyBagRes) {
+            const records = emptyBagRes.records || emptyBagRes.data || (Array.isArray(emptyBagRes) ? emptyBagRes : []);
+            const todayRecords = Array.isArray(records) ? records.filter(r => r.date?.slice(0, 10) === todayStr) : [];
+            const totalBalance = todayRecords.reduce((sum, r) => sum + (r.balanceQty || 0), 0);
+            setDashboardData(prev => ({
+              ...prev,
+              emptyBagRecords: todayRecords,
+              emptyBagTotalToday: todayRecords.length,
+              totalBalanceQty: totalBalance,
+              latestEmptyBagRecord: todayRecords[todayRecords.length - 1] || null,
+            }));
+          }
+        } else {
+          console.error("Error loading empty bag records:", emptyBagResult.reason);
+        }
+
+        // Pre-number records
+        if (preNumberResult.status === "fulfilled") {
+          const preNumberRes = preNumberResult.value;
+          if (preNumberRes) {
+            const records = preNumberRes.records || preNumberRes.data || (Array.isArray(preNumberRes) ? preNumberRes : []);
+            const todayRecords = Array.isArray(records) ? records.filter(r => r.startDate?.slice(0, 10) === todayStr) : [];
+            setDashboardData(prev => ({
+              ...prev,
+              preNumberRecords: todayRecords,
+              preNumberTotalToday: todayRecords.length,
+              latestPreNumberRecord: todayRecords[todayRecords.length - 1] || null,
+            }));
+          }
+        } else {
+          console.error("Error loading pre-number records:", preNumberResult.reason);
+        }
+
+        // Weekly spot checks
+        if (spotCheckResult.status === "fulfilled") {
+          const spotCheckRes = spotCheckResult.value;
+          if (spotCheckRes) {
+            let records = [];
+
+            // Handle different API response structures
+            if (spotCheckRes.data && Array.isArray(spotCheckRes.data)) {
+              records = spotCheckRes.data;
+            } else if (spotCheckRes.records && Array.isArray(spotCheckRes.records)) {
+              records = spotCheckRes.records;
+            } else if (Array.isArray(spotCheckRes)) {
+              records = spotCheckRes;
+            }
+
+            // Sort by date descending (newest first)
+            const sortedRecords = records.sort((a, b) =>
+              new Date(b.date) - new Date(a.date)
+            );
+
+            const latestRecord = sortedRecords[0] || null;
+            const equipmentStatus = calculateEquipmentStatus(latestRecord);
+
+            // Check if weekly spot check is due
+            const dueCheck = checkSpotCheckDue(latestRecord?.date);
+            setSpotCheckAlert(dueCheck);
+
+            setDashboardData(prev => ({
+              ...prev,
+              spotCheckRecords: sortedRecords,
+              spotCheckTotalThisWeek: sortedRecords.filter(r => {
+                if (!r.date) return false;
+                const recordDate = new Date(r.date);
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                return recordDate >= sevenDaysAgo;
+              }).length,
+              latestSpotCheckRecord: latestRecord,
+              spotCheckStatus: sortedRecords.length > 0 ? "Completed" : "Pending",
+              equipmentStatus: equipmentStatus,
+              lastSpotCheckDate: latestRecord?.date,
+            }));
+          }
+        } else {
+          console.error("Error loading weekly spot checks:", spotCheckResult.reason);
+        }
+
+        // Quarterly spot checks
+        if (quarterlyResult.status === "fulfilled") {
+          const quarterlyRes = quarterlyResult.value;
+          if (quarterlyRes) {
+            let records = [];
+
+            if (quarterlyRes.data && Array.isArray(quarterlyRes.data)) {
+              records = quarterlyRes.data;
+            } else if (quarterlyRes.records && Array.isArray(quarterlyRes.records)) {
+              records = quarterlyRes.records;
+            } else if (Array.isArray(quarterlyRes)) {
+              records = quarterlyRes;
+            }
+
+            const sortedQuarterly = records.sort((a, b) =>
+              new Date(b.date) - new Date(a.date)
+            );
+            const latestQuarterly = sortedQuarterly[0] || null;
+            const quarterlyEquipmentStatus = calculateEquipmentStatus(latestQuarterly);
+
+            // Check if quarterly spot check is due
+            const quarterlyDueCheck = checkQuarterlySpotCheckDue(latestQuarterly?.date);
+            setQuarterlySpotCheckAlert(quarterlyDueCheck);
+
+            setDashboardData(prev => ({
+              ...prev,
+              quarterlySpotCheckRecords: sortedQuarterly,
+              quarterlySpotCheckTotal: sortedQuarterly.filter(r => {
+                if (!r.date) return false;
+                const recordDate = new Date(r.date);
+                const forteen = new Date();
+                forteen.setDate(forteen.getDate() - 14);
+                return recordDate >= forteen;
+              }).length,
+              latestQuarterlySpotCheckRecord: latestQuarterly || null,
+              quarterlySpotCheckStatus: sortedQuarterly.length > 0 ? "Completed" : "Pending",
+              quarterlyEquipmentStatus: quarterlyEquipmentStatus,
+              lastQuarterlySpotCheckDate: latestQuarterly?.date,
+            }));
+          }
+        } else {
+          console.error("Error loading quarterly spot checks:", quarterlyResult.reason);
         }
 
       } catch (error) {
