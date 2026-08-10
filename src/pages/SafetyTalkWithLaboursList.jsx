@@ -548,10 +548,13 @@ export default function SafetyTalkList() {
                     className={`px-3 py-1 border font-semibold ${
                       item.doVerified === "Verified"
                         ? "text-green-600"
+                        : item.doVerified === "Rejected"
+                        ? "text-orange-600"
                         : "text-red-500"
                     }`}
+                    title={item.doVerified === "Rejected" ? item.rejectionReason : ""}
                   >
-                    {item.doVerified || "DO Not Verified"}
+                    {item.doVerified === "Rejected" ? "✘ Reverted by DO" : (item.doVerified || "DO Not Verified")}
                   </td>
                   <td className="px-3 py-1 border">{item.doEmail || "-"}</td>
                   <td className="px-3 py-1 border actions">

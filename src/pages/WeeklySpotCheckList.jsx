@@ -236,6 +236,7 @@ export default function WeeklySpotCheckPrintView() {
                                             {filteredAndSortedChecks.map((check) => {
                                                 const { day, month, year, fullDate } = formatDate(check.date);
                                                 const isVerified = check.verifiedBy === "Verified";
+                                                const isRevertedCheck = check.verifiedBy === "Rejected";
                                                 const isSelected = selectedCheck?._id === check._id;
 
                                                 return (
@@ -245,9 +246,13 @@ export default function WeeklySpotCheckPrintView() {
                                                         className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${isSelected
                                                             ? isVerified
                                                                 ? 'ring-2 ring-green-500 bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 shadow-lg'
+                                                                : isRevertedCheck
+                                                                ? 'ring-2 ring-orange-500 bg-gradient-to-r from-orange-50 to-amber-50 border-orange-300 shadow-lg'
                                                                 : 'ring-2 ring-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 shadow-lg'
                                                             : isVerified
                                                                 ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 hover:shadow-md hover:border-green-300'
+                                                                : isRevertedCheck
+                                                                ? 'bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 hover:shadow-md hover:border-orange-300'
                                                                 : 'bg-white border border-gray-100 hover:shadow-md hover:border-blue-200'
                                                             }`}
                                                     >
@@ -257,6 +262,8 @@ export default function WeeklySpotCheckPrintView() {
                                                                 {/* Date Circle */}
                                                                 <div className={`relative w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 ${isVerified
                                                                     ? 'bg-gradient-to-br from-green-500 to-emerald-600'
+                                                                    : isRevertedCheck
+                                                                    ? 'bg-gradient-to-br from-orange-500 to-amber-600'
                                                                     : 'bg-gradient-to-br from-blue-500 to-indigo-600'
                                                                     } text-white shadow`}>
                                                                     <div className="text-sm font-bold">{day}</div>
@@ -267,11 +274,16 @@ export default function WeeklySpotCheckPrintView() {
                                                                 <div className="min-w-0 flex-1">
                                                                     <div className="flex items-center gap-2 mb-1">
                                                                         <p className="text-sm font-semibold text-gray-800 truncate">{fullDate}</p>
-                                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${isVerified
-                                                                            ? 'bg-green-100 text-green-800'
-                                                                            : 'bg-red-100 text-red-800'
-                                                                            }`}>
-                                                                            {isVerified ? 'VERIFIED' : 'NOT VERIFIED'}
+                                                                        <span
+                                                                            className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${isVerified
+                                                                                ? 'bg-green-100 text-green-800'
+                                                                                : isRevertedCheck
+                                                                                ? 'bg-orange-100 text-orange-800'
+                                                                                : 'bg-red-100 text-red-800'
+                                                                            }`}
+                                                                            title={isRevertedCheck ? (check.rejectionReason || "No reason provided") : ""}
+                                                                        >
+                                                                            {isVerified ? 'VERIFIED' : isRevertedCheck ? 'REVERTED BY DO' : 'NOT VERIFIED'}
                                                                         </span>
                                                                     </div>
                                                                     <p className="text-xs text-gray-600 truncate">
@@ -287,11 +299,11 @@ export default function WeeklySpotCheckPrintView() {
 
                                                             {/* Selection Indicator */}
                                                             <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ml-2 ${isSelected
-                                                                ? isVerified ? 'bg-green-100' : 'bg-blue-100'
+                                                                ? isVerified ? 'bg-green-100' : isRevertedCheck ? 'bg-orange-100' : 'bg-blue-100'
                                                                 : 'bg-gray-100'
                                                                 }`}>
                                                                 <div className={`w-3 h-3 rounded-full ${isSelected
-                                                                    ? isVerified ? 'bg-green-500' : 'bg-blue-500'
+                                                                    ? isVerified ? 'bg-green-500' : isRevertedCheck ? 'bg-orange-500' : 'bg-blue-500'
                                                                     : 'bg-gray-400'
                                                                     }`}></div>
                                                             </div>
@@ -376,6 +388,20 @@ export default function WeeklySpotCheckPrintView() {
                                                                     {selectedCheck.doVerifiedAt && (
                                                                         <p className="text-xs text-gray-500 mt-0.5">
                                                                             on {formatDate(selectedCheck.doVerifiedAt).fullDate}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            ) : selectedCheck.verifiedBy === "Rejected" ? (
+                                                                <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                                                    <p className="text-sm font-semibold text-orange-700">✘ Reverted by DO</p>
+                                                                    {selectedCheck.rejectionReason && (
+                                                                        <p className="text-xs text-gray-600 mt-0.5">
+                                                                            Reason: {selectedCheck.rejectionReason}
+                                                                        </p>
+                                                                    )}
+                                                                    {selectedCheck.rejectedAt && (
+                                                                        <p className="text-xs text-gray-500 mt-0.5">
+                                                                            on {formatDate(selectedCheck.rejectedAt).fullDate}
                                                                         </p>
                                                                     )}
                                                                 </div>

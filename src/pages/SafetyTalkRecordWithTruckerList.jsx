@@ -894,10 +894,13 @@ export default function SafetyTalkTruckerList() {
                         className={`px-4 py-3 font-semibold ${
                           item.doVerified === "Verified"
                             ? "text-green-600"
+                            : item.doVerified === "Rejected"
+                            ? "text-orange-600"
                             : "text-red-500"
                         }`}
+                        title={item.doVerified === "Rejected" ? item.rejectionReason : ""}
                       >
-                        {item.doVerified || "DO Not Verified"}
+                        {item.doVerified === "Rejected" ? "✘ Reverted by DO" : (item.doVerified || "DO Not Verified")}
                       </td>
                       <td className="px-4 py-3">{item.doEmail || "-"}</td>
                       <td className="px-4 py-3 actions">
@@ -1089,12 +1092,22 @@ export default function SafetyTalkTruckerList() {
                       className={`text-sm p-2 rounded-lg font-semibold ${
                         item.doVerified === "Verified"
                           ? "bg-green-50 text-green-600"
+                          : item.doVerified === "Rejected"
+                          ? "bg-orange-50 text-orange-600"
                           : "bg-red-50 text-red-500"
                       }`}
+                      title={item.doVerified === "Rejected" ? item.rejectionReason : ""}
                     >
-                      {item.doVerified || "DO Not Verified"}
-                      {item.doEmail ? ` (${item.doEmail})` : ""}
+                      {item.doVerified === "Rejected"
+                        ? "✘ Reverted by DO"
+                        : (item.doVerified || "DO Not Verified")}
+                      {item.doVerified === "Verified" && item.doEmail ? ` (${item.doEmail})` : ""}
                     </p>
+                    {item.doVerified === "Rejected" && item.rejectionReason && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Reason: {item.rejectionReason}
+                      </p>
+                    )}
                   </div>
 
                   {editingId === item._id && (

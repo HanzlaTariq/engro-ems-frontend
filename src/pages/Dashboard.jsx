@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import NotificationBell from "../components/NotificationBell";
 import API from "../utils/api";
 import {
   FaBolt,
@@ -550,6 +551,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <NotificationBell engroColors={engroColors} />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
               <span style={{ fontWeight: "600", color: engroColors.dark, fontSize: "14px" }}>{user?.name}</span>
               <span style={{ color: engroColors.neutral, fontSize: "12px" }}>{user?.role || "Manager"} • {user?.warehouse?.name}</span>

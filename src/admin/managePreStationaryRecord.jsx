@@ -10,6 +10,7 @@ export default function ManagePreStationaryRecord() {
 
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showReverted, setShowReverted] = useState(false);
 
   // Fetch all records (admin filtered)
   const fetchRecords = async () => {
@@ -82,17 +83,24 @@ export default function ManagePreStationaryRecord() {
 
 // Delete
 const handleDelete = async (id) => {
-    const confirm = await Swal.fire({
-      title: 'Delete Record?',
-      text: "This action cannot be undone!",
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: 'Revert this record?',
+      text: "This will NOT delete the record permanently. It will be sent back to the warehouse manager with your reason, and they will see a notification on their dashboard.",
       icon: 'warning',
+      input: 'textarea',
+      inputPlaceholder: 'Reason for reverting this record...',
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return 'Please provide a reason so the warehouse manager knows what to fix.';
+        }
+      },
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
+      confirmButtonText: 'Yes, revert it!',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#d33',
     });
 
-    if (!confirm.isConfirmed) return;
+    if (!isConfirmed) return;
 
     try {
       if (!adminToken) {
@@ -106,14 +114,17 @@ const handleDelete = async (id) => {
 
       await API.delete(
         `/api/pre-number-stationary-record/${id}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } }
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+          data: { reason },
+        }
       );
 
       Swal.fire({
         icon: 'success',
-        title: 'Deleted!',
-        text: 'The record has been deleted successfully.',
-        timer: 2000,
+        title: 'Reverted!',
+        text: 'The record has been reverted and the warehouse manager has been notified.',
+        timer: 2500,
         showConfirmButton: false,
       });
 
@@ -121,7 +132,7 @@ const handleDelete = async (id) => {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Delete Failed',
+        title: 'Revert Failed',
         text: err.response?.data?.message || err.message,
       });
       console.error("Delete failed:", err.response?.data || err);
@@ -139,11 +150,29 @@ const handleDelete = async (id) => {
     return `${String(d.getDate()).padStart(2, "0")}-${String(d.getMonth() + 1).padStart(2, "0")}-${d.getFullYear()}`;
   };
 
+  const revertedRecords = records.filter((rec) => rec.doVerified === "Rejected");
+  const visibleRecords = showReverted
+    ? records
+    : records.filter((rec) => rec.doVerified !== "Rejected");
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Manage Pre Number Stationary Records
       </h1>
+
+      {!loading && revertedRecords.length > 0 && (
+        <div className="max-w-6xl mx-auto mb-4 flex justify-end">
+          <button
+            onClick={() => setShowReverted((v) => !v)}
+            className="text-xs px-3 py-1.5 rounded-md border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 transition"
+          >
+            {showReverted
+              ? "Hide Reverted Records"
+              : `Show Reverted Records (${revertedRecords.length})`}
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-center text-gray-600">Loading records...</p>
@@ -166,14 +195,14 @@ const handleDelete = async (id) => {
               </tr>
             </thead>
             <tbody>
-              {records.length === 0 ? (
+              {visibleRecords.length === 0 ? (
                 <tr>
                   <td colSpan="11" className="text-center py-3 text-gray-500">
                     No records found.
                   </td>
                 </tr>
               ) : (
-                records.map((rec) => (
+                visibleRecords.map((rec) => (
                   <tr
                     key={rec._id}
                     className="text-center border-t hover:bg-gray-50 transition"
@@ -189,8 +218,11 @@ const handleDelete = async (id) => {
                      <td
                       className={`py-1 px-2 border font-semibold ${rec.doVerified === "Verified"
                           ? "text-green-600"
+                          : rec.doVerified === "Rejected"
+                          ? "text-orange-600"
                           : "text-red-500"
                         }`}
+                      title={rec.doVerified === "Rejected" ? rec.rejectionReason : ""}
                     >
                       {rec.doVerified}
                     </td>
@@ -210,9 +242,16 @@ const handleDelete = async (id) => {
                             onClick={() => handleDelete(rec._id)}
                             className="bg-red-600 text-white px-2 py-0.5 text-xs rounded-sm hover:bg-red-700 transition"
                           >
-                            Delete
+                            Revert
                           </button>
                         </>
+                      ) : rec.doVerified === "Rejected" ? (
+                        <span
+                          className="text-orange-600 font-semibold cursor-help"
+                          title={rec.rejectionReason || "No reason provided"}
+                        >
+                          ✘ Reverted
+                        </span>
                       ) : (
                         <span className="text-gray-500">✔ Verified</span>
                       )}

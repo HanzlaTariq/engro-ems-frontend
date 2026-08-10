@@ -377,7 +377,7 @@ export default function EmptyBagList() {
               <th className="px-2 py-1 border">Plant Code</th>
               <th className="px-2 py-1 border">Balance Qty</th>
               <th className="px-2 py-1 border">WHI Initial</th>
-              <th className="px-2 py-1 border">DO Verified</th>
+              <th className="px-2 py-1 border">Status</th>
               <th className="px-2 py-1 border actions">Actions</th>
             </tr>
           </thead>
@@ -499,7 +499,20 @@ export default function EmptyBagList() {
                         />
                       </td>
                       <td className="px-3 py-1 border">
-                        {item.doEmail || "DO Not Verified"}
+                        {item.doVerified === "Verified" ? (
+                          <span className="text-green-600 font-semibold">
+                            ✔ Verified{item.doEmail ? ` (${item.doEmail})` : ""}
+                          </span>
+                        ) : item.doVerified === "Rejected" ? (
+                          <span
+                            className="text-orange-600 font-semibold cursor-help"
+                            title={item.rejectionReason || "No reason provided"}
+                          >
+                            ✘ Reverted by DO
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">Pending</span>
+                        )}
                       </td>
                       <td className="px-3 py-1 border actions">
                         <div className="flex gap-2">
@@ -539,7 +552,20 @@ export default function EmptyBagList() {
                       <td className="px-3 py-1 border">{item.balanceQty}</td>
                       <td className="px-3 py-1 border">{item.whiInitial}</td>
                       <td className="px-3 py-1 border">
-                        {item.doEmail || "DO Not Verified"}
+                        {item.doVerified === "Verified" ? (
+                          <span className="text-green-600 font-semibold">
+                            ✔ Verified{item.doEmail ? ` (${item.doEmail})` : ""}
+                          </span>
+                        ) : item.doVerified === "Rejected" ? (
+                          <span
+                            className="text-orange-600 font-semibold cursor-help"
+                            title={item.rejectionReason || "No reason provided"}
+                          >
+                            ✘ Reverted by DO
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">Pending</span>
+                        )}
                       </td>
                       <td className="px-3 py-1 border actions">
                         {item.doVerified !== "Verified" ? (

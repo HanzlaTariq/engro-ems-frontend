@@ -144,17 +144,24 @@ export default function ManagequarterlySpotCheck() {
   };
 
   const handleDelete = async (id) => {
-    const confirm = await Swal.fire({
-      title: 'Delete Record?',
-      text: "This action cannot be undone!",
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: 'Revert this record?',
+      text: "This will NOT delete the record permanently. It will be sent back to the warehouse manager with your reason, and they will see a notification on their dashboard.",
       icon: 'warning',
+      input: 'textarea',
+      inputPlaceholder: 'Reason for reverting this record...',
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return 'Please provide a reason so the warehouse manager knows what to fix.';
+        }
+      },
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
+      confirmButtonText: 'Yes, revert it!',
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#d33',
     });
 
-    if (!confirm.isConfirmed) return;
+    if (!isConfirmed) return;
 
     try {
       if (!adminToken) {
@@ -168,14 +175,17 @@ export default function ManagequarterlySpotCheck() {
 
       await API.delete(
         `/api/quarterly-spot-check/${id}`,
-        { headers: { Authorization: `Bearer ${adminToken}` } }
+        {
+          headers: { Authorization: `Bearer ${adminToken}` },
+          data: { reason },
+        }
       );
 
       Swal.fire({
         icon: 'success',
-        title: 'Deleted!',
-        text: 'The quarterly Spot Check record has been deleted successfully.',
-        timer: 2000,
+        title: 'Reverted!',
+        text: 'The quarterly Spot Check record has been reverted and the warehouse manager has been notified.',
+        timer: 2500,
         showConfirmButton: false,
       });
 
@@ -183,10 +193,10 @@ export default function ManagequarterlySpotCheck() {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Delete Failed',
+        title: 'Revert Failed',
         text: err.response?.data?.message || err.message,
       });
-      console.error("Delete failed:", err.response?.data || err);
+      console.error("Revert failed:", err.response?.data || err);
     }
   };
 
@@ -223,22 +233,28 @@ export default function ManagequarterlySpotCheck() {
   // Filter records based on active tab
   const filteredRecords = Array.isArray(records) ? records.filter(rec => {
     const isVerified = rec.verifiedBy === "Verified" || rec.status === "Verified";
-    const isPending = !isVerified;
+    const isRevertedRec = rec.verifiedBy === "Rejected";
+    const isPending = !isVerified && !isRevertedRec;
 
     switch (activeTab) {
       case 'verified':
         return isVerified;
       case 'pending':
         return isPending;
+      case 'reverted':
+        return isRevertedRec;
       default:
         return true;
     }
   }) : [];
 
-  // Check if record is pending verification
+  // A record that was reverted by DO — kept, not deleted, waiting on the manager
+  const isReverted = (record) => record.verifiedBy === "Rejected";
+
+  // Check if record is pending verification (never true for a reverted record)
   const isPendingVerification = (record) => {
     // Only consider explicitly "Verified" - not strings containing "Verified"
-    return !(record.verifiedBy === "Verified" || record.status === "Verified");
+    return !(record.verifiedBy === "Verified" || record.status === "Verified" || isReverted(record));
   };
 
   return (
@@ -277,14 +293,21 @@ export default function ManagequarterlySpotCheck() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'pending' ? 'bg-amber-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             <ClockIcon className="w-4 h-4" />
-            Pending Verification ({filteredRecords.filter(r => isPendingVerification(r)).length})
+            Pending Verification ({records.filter(r => isPendingVerification(r)).length})
           </button>
           <button
             onClick={() => setActiveTab('verified')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'verified' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             <CheckCircleIcon className="w-4 h-4" />
-            Verified ({filteredRecords.filter(r => !isPendingVerification(r)).length})
+            Verified ({records.filter(r => (r.verifiedBy === "Verified" || r.status === "Verified")).length})
+          </button>
+          <button
+            onClick={() => setActiveTab('reverted')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'reverted' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+          >
+            <TrashIcon className="w-4 h-4" />
+            Reverted ({records.filter(r => isReverted(r)).length})
           </button>
         </div>
 
@@ -308,6 +331,7 @@ export default function ManagequarterlySpotCheck() {
                 <p className="text-gray-600">
                   {activeTab === 'all' ? 'No spot check records available.' :
                     activeTab === 'pending' ? 'All records have been verified.' :
+                      activeTab === 'reverted' ? 'No reverted records.' :
                       'No verified records found.'}
                 </p>
               </div>
@@ -329,6 +353,14 @@ export default function ManagequarterlySpotCheck() {
                             <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-medium rounded-full flex items-center gap-1">
                               <ClockIcon className="w-3 h-3" />
                               Pending
+                            </span>
+                          ) : isReverted(rec) ? (
+                            <span
+                              className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded-full flex items-center gap-1 cursor-help"
+                              title={rec.rejectionReason || "No reason provided"}
+                            >
+                              <TrashIcon className="w-3 h-3" />
+                              Reverted
                             </span>
                           ) : (
                             <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full flex items-center gap-1">
@@ -386,6 +418,13 @@ export default function ManagequarterlySpotCheck() {
                           Review & Verify
                           <ChevronRightIcon className="w-4 h-4" />
                         </button>
+                      ) : isReverted(rec) ? (
+                        <button
+                          onClick={() => viewDetails(rec)}
+                          className="flex-1 bg-gray-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                        >
+                          View Details
+                        </button>
                       ) : (
                         <>
                           <button
@@ -397,7 +436,7 @@ export default function ManagequarterlySpotCheck() {
                           <button
                             onClick={() => handleDelete(rec._id)}
                             className="px-3 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                            title="Delete record"
+                            title="Revert record"
                           >
                             <TrashIcon className="w-4 h-4" />
                           </button>
@@ -405,13 +444,26 @@ export default function ManagequarterlySpotCheck() {
                       )}
                     </div>
 
-                    {/* Verified Info */}
-                    {!isPendingVerification(rec) && rec.verifiedBy && (
+                    {/* Verified / Reverted Info */}
+                    {isReverted(rec) ? (
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-xs text-gray-500">
-                          Verified by: <span className="font-medium text-gray-700">{rec.verifiedBy}</span>
+                        <p className="text-xs text-orange-600 font-medium">
+                          Reverted{rec.rejectedAt ? ` on ${formatDate(rec.rejectedAt)}` : ""}
                         </p>
+                        {rec.rejectionReason && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Reason: {rec.rejectionReason}
+                          </p>
+                        )}
                       </div>
+                    ) : (
+                      !isPendingVerification(rec) && rec.verifiedBy && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <p className="text-xs text-gray-500">
+                            Verified by: <span className="font-medium text-gray-700">{rec.verifiedBy}</span>
+                          </p>
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
@@ -508,10 +560,17 @@ export default function ManagequarterlySpotCheck() {
                     <h3 className="font-semibold text-gray-700">Status:</h3>
                     <p className={`font-semibold ${selectedRecord.verifiedBy === "Verified" || selectedRecord.status === "Verified"
                       ? "text-green-600"
+                      : selectedRecord.verifiedBy === "Rejected"
+                      ? "text-orange-600"
                       : "text-red-500"
                       }`}>
                       {selectedRecord.verifiedBy || "Pending"}
                     </p>
+                    {selectedRecord.verifiedBy === "Rejected" && selectedRecord.rejectionReason && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Reason: {selectedRecord.rejectionReason}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-700">Created At:</h3>
@@ -896,7 +955,7 @@ export default function ManagequarterlySpotCheck() {
                         className="px-6 py-3 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
                       >
                         <TrashIcon className="w-4 h-4" />
-                        Delete
+                        Revert
                       </button>
                     </div>
                   )}
