@@ -1,16 +1,19 @@
 // utils/api.js
 import axios from "axios";
+import { attachRetry } from "./retry";
 
 // Axios instance
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
+  withCredentials: false, // cookies use nahi ho rahi (Bearer token hai) -> false behtar hai
+  timeout: 25000, // cold start ke liye kaafi, lekin hamesha ke liye hang nahi
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL); // Add this
+// Network blip / cold start par GET aur login dobara try hoga
+attachRetry(API);
 
 // Request interceptor - token attach karega
 API.interceptors.request.use(
@@ -23,21 +26,33 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - 401 (unauthorized) pe auto logout
+const isLoginRequest = (url = "") =>
+  url.includes("/api/auth/login") || url.includes("/api/admin/login");
+
+// Response interceptor - token invalid/expire (401) par auto logout
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url || "";
+
+    // Login ka galat password bhi 401 de sakta hai — us waqt page reload/redirect NAHI karna,
+    // warna user ko error message nazar hi nahi aata tha ("login nahi hota" ki ek wajah).
+    if (status === 401 && !isLoginRequest(url)) {
+      const onAdminPage = window.location.pathname.startsWith("/admin");
+
       sessionStorage.removeItem("adminToken");
       sessionStorage.removeItem("adminData");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
-      window.location.href = "/login"; // redirect to login
+
+      const target = onAdminPage ? "/admin/login" : "/login";
+      if (window.location.pathname !== target) {
+        window.location.href = target;
+      }
     }
     return Promise.reject(error);
   }
 );
 
 export default API;
-
-

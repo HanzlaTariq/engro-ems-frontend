@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminAuthContext } from "./context/AdminAuthContext";
 import API from "../utils/api.js";
+import { getLoginErrorMessage } from "../utils/retry";
 // ✅ background image import
 import bgImage from "../assets/images/bg.jpeg";
 
@@ -36,7 +37,7 @@ export default function AdminLogin() {
       loginAdmin(res.data.admin, res.data.token);
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid credentials");
+      setError(getLoginErrorMessage(err, "Invalid credentials"));
     } finally {
       setLoading(false);
     }

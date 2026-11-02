@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import api from "../utils/api";
+import { getLoginErrorMessage } from "../utils/retry";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -19,9 +20,7 @@ export default function Login() {
       login(res.data.token, res.data.user);
       navigate("/dashboard");
     } catch (err) {
-      console.error("Full Error:", err);
-      console.error("Response Data:", err.response?.data);
-      alert(err.response?.data?.msg || "Login failed");
+      alert(getLoginErrorMessage(err, "Login failed"));
     } finally {
       setIsLoading(false);
     }
