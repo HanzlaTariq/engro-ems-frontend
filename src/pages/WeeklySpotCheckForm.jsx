@@ -14,27 +14,13 @@ export default function WeeklySpotCheckForm() {
         storageLocation: "",
         plantCode: "",
         stocks: [
-            { item: "Urea", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "EEDAP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(G)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(B)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "TSP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(T)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "SSP 25 Kg", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "SSP 50 Kg", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "MOP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Zingro", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
         ],
         elcb: {
             weekly: { month: "", whi: "", electrician: "", comment: "" },
-            quarterly: { month: "", whi: "", electrician: "", comment: "" },
-        },
-        earthingHealth: {
-            month: "",
-            ohm: "",
-            electrician: "",
-            stamp: "",
-            comment: ""
         },
         stitchingMachine: {
             condition: "",
@@ -83,8 +69,6 @@ export default function WeeklySpotCheckForm() {
             { status: "", remarks: "", freq: "Monthly" },
             { status: "", remarks: "", freq: "Monthly" },
             { status: "", remarks: "", freq: "Monthly" },
-            { status: "", remarks: "", freq: "Quarterly" },
-            { status: "", remarks: "", freq: "Quarterly" },
         ],
         emergencyNumbers: {
             fireBrigade: "",
@@ -133,8 +117,7 @@ export default function WeeklySpotCheckForm() {
                     storageLocation: rec.storageLocation || "",
                     plantCode: rec.plantCode || "",
                     stocks: rec.stocks?.length ? rec.stocks : form.stocks,
-                    elcb: rec.elcb || form.elcb,
-                    earthingHealth: rec.earthingHealth || form.earthingHealth,
+                    elcb: { weekly: rec.elcb?.weekly || form.elcb.weekly },
                     stitchingMachine: rec.stitchingMachine || form.stitchingMachine,
                     weighingScale: rec.weighingScale || form.weighingScale,
                     upsBattery: rec.upsBattery || form.upsBattery,
@@ -166,7 +149,9 @@ export default function WeeklySpotCheckForm() {
                           }))
                         : form.fireExtinguishers,
                     safetyRamp: rec.safetyRamp?.length ? rec.safetyRamp : form.safetyRamp,
-                    srlHarness: rec.srlHarness?.length ? rec.srlHarness : form.srlHarness,
+                    srlHarness: rec.srlHarness?.length
+                        ? rec.srlHarness.filter((h) => h.freq !== "Quarterly")
+                        : form.srlHarness,
                     emergencyNumbers: rec.emergencyNumbers || form.emergencyNumbers,
                     medicine: rec.medicine || "",
                     warehouseIncharge: rec.warehouseIncharge || user?.name || "",
@@ -289,9 +274,17 @@ export default function WeeklySpotCheckForm() {
       return;
     }
 
+    // fully blank stock rows are skipped
+    const payload = {
+      ...form,
+      stocks: form.stocks.filter(
+        (st) => st.item || st.sitQty !== "" || st.physicalCount !== "" || st.looseProduct !== "" || st.remarks
+      ),
+    };
+
     await (isEditMode
-      ? API.put(`/api/spot-check/${id}`, form, { headers: { Authorization: `Bearer ${token}` } })
-      : API.post("/api/spot-check", form, { headers: { Authorization: `Bearer ${token}` } }));
+      ? API.put(`/api/spot-check/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } })
+      : API.post("/api/spot-check", payload, { headers: { Authorization: `Bearer ${token}` } }));
 
     Swal.fire({
       icon: 'success',
@@ -471,7 +464,7 @@ export default function WeeklySpotCheckForm() {
                             </tr>
                         </thead>
                         <tbody>
-                            {["Weekly", "Quarterly"].map((detail) => (
+                            {["Weekly"].map((detail) => (
                                 <tr key={detail}>
                                     <td className="border px-2 py-1">{detail}</td>
                                     <td className="border px-2 py-1">
@@ -539,89 +532,6 @@ export default function WeeklySpotCheckForm() {
                                     </td>
                                 </tr>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Earthing Health */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-2">Earthing Health</h2>
-                    <table className="w-full border">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-1">Detail</th>
-                                <th className="border px-2 py-1">Month</th>
-                                <th className="border px-2 py-1">Ohm</th>
-                                <th className="border px-2 py-1">Electrician</th>
-                                <th className="border px-2 py-1">Stamp/Signature</th>
-                                <th className="border px-2 py-1">Comment</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="border px-2 py-1">Quarterly</td>
-                                <td className="border px-2 py-1">
-                                    <select
-                                        className="w-full border px-1"
-                                        value={form.earthingHealth.month || ""}
-                                        onChange={(e) =>
-                                            handleChange("earthingHealth", "month", e.target.value)
-                                        }
-                                    >
-                                        <option value="">Select Month</option>
-                                        {[
-                                            "January", "February", "March", "April", "May", "June",
-                                            "July", "August", "September", "October", "November", "December"
-                                        ].map((m) => (
-                                            <option key={m} value={m}>{m}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input
-                                        type="text"
-                                        className="w-full border px-1"
-                                        value={form.earthingHealth.ohm || ""}
-                                        onChange={(e) =>
-                                            handleChange("earthingHealth", "ohm", e.target.value)
-                                        }
-                                    />
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input
-                                        type="text"
-                                        className="w-full border px-1"
-                                        value={form.earthingHealth.electrician || ""}
-                                        onChange={(e) =>
-                                            handleChange("earthingHealth", "electrician", e.target.value)
-                                        }
-                                    />
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input
-                                        type="text"
-                                        className="w-full border px-1"
-                                        value={form.earthingHealth.stamp || ""}
-                                        onChange={(e) =>
-                                            handleChange("earthingHealth", "stamp", e.target.value)
-                                        }
-                                    />
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <select
-                                        className="w-full border px-1"
-                                        value={form.earthingHealth.comment || ""}
-                                        onChange={(e) =>
-                                            handleChange("earthingHealth", "comment", e.target.value)
-                                        }
-                                    >
-                                        <option value="">Select Comment</option>
-                                        <option value="Good">Good</option>
-                                        <option value="Poor">Poor</option>
-                                        <option value="Needs Attention">Needs Attention</option>
-                                    </select>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1238,14 +1148,6 @@ export default function WeeklySpotCheckForm() {
                             {
                                 text: "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
                                 freq: "Monthly",
-                            },
-                            {
-                                text: "All bolts of iron frame/anchorage with pillar/roof properly fixed. Welded joints have no cracks.",
-                                freq: "Quarterly",
-                            },
-                            {
-                                text: "Plumb used to bind iron cable with U-turn buckle not loose, no damage, no cracks on SRL unit.",
-                                freq: "Quarterly",
                             },
                         ].map((item, idx) => (
                             <tr key={idx}>

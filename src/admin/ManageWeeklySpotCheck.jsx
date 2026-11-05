@@ -12,6 +12,9 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
+// ignore old Quarterly rows saved before the split
+const nonQuarterly = (arr) => (arr || []).filter((r) => r?.freq !== "Quarterly");
+
 export default function ManageWeeklySpotCheck() {
   const { admin, adminToken, loading: authLoading } = useContext(AdminAuthContext);
   const [records, setRecords] = useState([]);
@@ -399,12 +402,6 @@ export default function ManageWeeklySpotCheck() {
                           {rec.elcb?.weekly?.comment || "Not checked"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Earthing:</span>
-                        <span className={`text-sm font-medium ${rec.earthingHealth?.comment ? 'text-green-600' : 'text-gray-400'}`}>
-                          {rec.earthingHealth?.comment || "Not checked"}
-                        </span>
-                      </div>
                     </div>
 
                     {/* Action Buttons */}
@@ -603,10 +600,10 @@ export default function ManageWeeklySpotCheck() {
                 )}
 
                 {/* ELCB Section */}
-                {(selectedRecord.elcb?.weekly || selectedRecord.elcb?.quarterly) && (
+                {selectedRecord.elcb?.weekly && (
                   <div className="mb-6">
                     <h3 className="font-bold text-lg text-gray-800 mb-2">⚡ ELCB Check</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       {selectedRecord.elcb?.weekly && (
                         <div className="border p-3 rounded">
                           <h4 className="font-semibold">Weekly</h4>
@@ -616,29 +613,6 @@ export default function ManageWeeklySpotCheck() {
                           <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.weekly.comment || "-"}</p>
                         </div>
                       )}
-                      {selectedRecord.elcb?.quarterly && (
-                        <div className="border p-3 rounded">
-                          <h4 className="font-semibold">Quarterly</h4>
-                          <p><span className="font-medium">Month:</span> {selectedRecord.elcb.quarterly.month || "-"}</p>
-                          <p><span className="font-medium">WHI:</span> {selectedRecord.elcb.quarterly.whi || "-"}</p>
-                          <p><span className="font-medium">Electrician:</span> {selectedRecord.elcb.quarterly.electrician || "-"}</p>
-                          <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.quarterly.comment || "-"}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Earthing Health */}
-                {selectedRecord.earthingHealth && (
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg text-gray-800 mb-2">🔌 Earthing Health</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 border p-3 rounded">
-                      <p><span className="font-medium">Month:</span> {selectedRecord.earthingHealth.month || "-"}</p>
-                      <p><span className="font-medium">Ohm:</span> {selectedRecord.earthingHealth.ohm || "-"}</p>
-                      <p><span className="font-medium">Electrician:</span> {selectedRecord.earthingHealth.electrician || "-"}</p>
-                      <p><span className="font-medium">Stamp:</span> {selectedRecord.earthingHealth.stamp || "-"}</p>
-                      <p><span className="font-medium">Comment:</span> {selectedRecord.earthingHealth.comment || "-"}</p>
                     </div>
                   </div>
                 )}
@@ -792,7 +766,7 @@ export default function ManageWeeklySpotCheck() {
                 {/* SRL Harness */}
                 {selectedRecord.srlHarness && selectedRecord.srlHarness.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-lg text-gray-800 mb-2">🪢 SRL Harness ({selectedRecord.srlHarness.length})</h3>
+                    <h3 className="font-bold text-lg text-gray-800 mb-2">🪢 SRL Harness ({nonQuarterly(selectedRecord.srlHarness).length})</h3>
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm border">
                         <thead className="bg-gray-100">
@@ -817,24 +791,16 @@ export default function ManageWeeklySpotCheck() {
                               text: "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
                               freq: "Monthly",
                             },
-                            {
-                              text: "All bolts of iron frame/anchorage with pillar/roof properly fixed. Welded joints have no cracks.",
-                              freq: "Quarterly",
-                            },
-                            {
-                              text: "Plumb used to bind iron cable with U-turn buckle not loose, no damage, no cracks on SRL unit.",
-                              freq: "Quarterly",
-                            },
                           ].map((item, index) => (
                             <tr key={index}>
                               <td className="py-2 px-4 border text-sm">{item.text}</td>
                               <td className="py-2 px-4 border text-center">{item.freq}</td>
                               <td className="py-2 px-4 border text-center">
-                                <span className={selectedRecord.srlHarness[index]?.status === "Good" ? "text-green-600 font-semibold" : selectedRecord.srlHarness[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
-                                  {selectedRecord.srlHarness[index]?.status || "-"}
+                                <span className={nonQuarterly(selectedRecord.srlHarness)[index]?.status === "Good" ? "text-green-600 font-semibold" : nonQuarterly(selectedRecord.srlHarness)[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
+                                  {nonQuarterly(selectedRecord.srlHarness)[index]?.status || "-"}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 border">{selectedRecord.srlHarness[index]?.remarks || "-"}</td>
+                              <td className="py-2 px-4 border">{nonQuarterly(selectedRecord.srlHarness)[index]?.remarks || "-"}</td>
                             </tr>
                           ))}
                         </tbody>

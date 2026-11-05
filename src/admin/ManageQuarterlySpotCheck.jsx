@@ -12,6 +12,9 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
+// ignore old Weekly rows saved before the split
+const nonWeekly = (arr) => (arr || []).filter((r) => r?.frequently !== "Weekly");
+
 export default function ManagequarterlySpotCheck() {
   const { admin, adminToken, loading: authLoading } = useContext(AdminAuthContext);
   const [records, setRecords] = useState([]);
@@ -610,28 +613,17 @@ export default function ManagequarterlySpotCheck() {
                 )}
 
                 {/* ELCB Section */}
-                {(selectedRecord.elcb?.quarterly || selectedRecord.elcb?.quarterly) && (
+                {selectedRecord.elcb?.quarterly && (
                   <div className="mb-6">
                     <h3 className="font-bold text-lg text-gray-800 mb-2">⚡ ELCB Check</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedRecord.elcb?.quarterly && (
-                        <div className="border p-3 rounded">
-                          <h4 className="font-semibold">Weekly</h4>
-                          <p><span className="font-medium">Month:</span> {selectedRecord.elcb.weekly.month || "-"}</p>
-                          <p><span className="font-medium">WHI:</span> {selectedRecord.elcb.weekly.whi || "-"}</p>
-                          <p><span className="font-medium">Electrician:</span> {selectedRecord.elcb.weekly.electrician || "-"}</p>
-                          <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.weekly.comment || "-"}</p>
-                        </div>
-                      )}
-                      {selectedRecord.elcb?.quarterly && (
-                        <div className="border p-3 rounded">
-                          <h4 className="font-semibold">Quarterly</h4>
-                          <p><span className="font-medium">Month:</span> {selectedRecord.elcb.quarterly.month || "-"}</p>
-                          <p><span className="font-medium">WHI:</span> {selectedRecord.elcb.quarterly.whi || "-"}</p>
-                          <p><span className="font-medium">Electrician:</span> {selectedRecord.elcb.quarterly.electrician || "-"}</p>
-                          <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.quarterly.comment || "-"}</p>
-                        </div>
-                      )}
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="border p-3 rounded">
+                        <h4 className="font-semibold">Quarterly</h4>
+                        <p><span className="font-medium">Month:</span> {selectedRecord.elcb.quarterly.month || "-"}</p>
+                        <p><span className="font-medium">WHI:</span> {selectedRecord.elcb.quarterly.whi || "-"}</p>
+                        <p><span className="font-medium">Electrician:</span> {selectedRecord.elcb.quarterly.electrician || "-"}</p>
+                        <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.quarterly.comment || "-"}</p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -760,7 +752,7 @@ export default function ManagequarterlySpotCheck() {
                 {/* Safety Ramp */}
                 {selectedRecord.safetyRamp && selectedRecord.safetyRamp.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-lg text-gray-800 mb-2">🛡️ Safety Ramp ({selectedRecord.safetyRamp.length})</h3>
+                    <h3 className="font-bold text-lg text-gray-800 mb-2">🛡️ Safety Ramp ({nonWeekly(selectedRecord.safetyRamp).length})</h3>
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm border">
                         <thead className="bg-gray-100">
@@ -773,21 +765,19 @@ export default function ManagequarterlySpotCheck() {
                         </thead>
                         <tbody>
                           {[
-                            "Is rubber surface of safety ramp and handrail rubber grip properly glued. Also grip not hanging with handrail?",
-                            "Side stability holder and intact with ramp also check all the welded joint found no crack or damage",
                             "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
                             "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
                             "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
                           ].map((description, index) => (
                             <tr key={index}>
                               <td className="py-2 px-4 border text-sm">{description}</td>
-                              <td className="py-2 px-4 border text-center">{selectedRecord.safetyRamp[index]?.frequently || "-"}</td>
+                              <td className="py-2 px-4 border text-center">{nonWeekly(selectedRecord.safetyRamp)[index]?.frequently || "-"}</td>
                               <td className="py-2 px-4 border text-center">
-                                <span className={selectedRecord.safetyRamp[index]?.status === "Good" ? "text-green-600 font-semibold" : selectedRecord.srlHarness[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
-                                  {selectedRecord.safetyRamp[index]?.status || "-"}
+                                <span className={nonWeekly(selectedRecord.safetyRamp)[index]?.status === "Good" ? "text-green-600 font-semibold" : selectedRecord.srlHarness[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
+                                  {nonWeekly(selectedRecord.safetyRamp)[index]?.status || "-"}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 border">{selectedRecord.safetyRamp[index]?.remarks || "-"}</td>
+                              <td className="py-2 px-4 border">{nonWeekly(selectedRecord.safetyRamp)[index]?.remarks || "-"}</td>
                             </tr>
                           ))}
                         </tbody>

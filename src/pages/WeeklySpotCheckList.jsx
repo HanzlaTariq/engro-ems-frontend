@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios.jsx";
+// ignore old Quarterly rows saved before the split
+const nonQuarterly = (arr) => (arr || []).filter((r) => r?.freq !== "Quarterly");
+
 export default function WeeklySpotCheckPrintView() {
     const navigate = useNavigate();
     const [spotChecks, setSpotChecks] = useState([]);
@@ -598,40 +601,6 @@ export default function WeeklySpotCheckPrintView() {
                                     <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.electrician}</td>
                                     <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.comment}</td>
                                 </tr>
-                                <tr>
-                                    <td className="border border-gray-400 p-0.5">Quarterly</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.month}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.whi}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.electrician}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.comment}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Earthing Health */}
-                    <div className="mb-0.5">
-                        <p className="font-bold mb-0.5 text-xs">Earthing Health:</p>
-                        <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
-                            <thead>
-                                <tr>
-                                    <th className="border border-gray-400 p-0.5 w-20">Detail</th>
-                                    <th className="border border-gray-400 p-0.5">Month</th>
-                                    <th className="border border-gray-400 p-0.5">Ohm</th>
-                                    <th className="border border-gray-400 p-0.5">Electrician</th>
-                                    <th className="border border-gray-400 p-0.5">Stamp/Signature</th>
-                                    <th className="border border-gray-400 p-0.5">Comments</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="border border-gray-400 p-0.5">Quarterly</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.month}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.ohm}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.electrician}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.stamp}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.earthingHealth?.comment}</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -839,18 +808,16 @@ export default function WeeklySpotCheckPrintView() {
                                     "Lifeline lock up when received sharp jerks, also harness in good shape & has no damage in harness webbing & belts as well pulled stitches and broken fiber.",
                                     "Is the snap hook operating freely, correctly, not bent, no crack, no damage sign. Buckles have no distortion, crack or break.",
                                     "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
-                                    "All bolts of iron frame/anchorage with pillar/roof properly fixed. Welded joints have no cracks.",
-                                    "Plumb used to bind iron cable with U-turn buckle not loose, no damage, no cracks on SRL unit.",
                                 ].map((text, i) => ({
                                     text,
-                                    freq: i < 3 ? "Monthly" : "Quarterly"
+                                    freq: "Monthly"
                                 })).map((item, i) => (
                                     <tr key={i}>
                                         <td className="border border-gray-400 p-0.5 text-[8px]">{item.text}</td>
                                         <td className="border border-gray-400 p-0.5 text-center">{item.freq}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.srlHarness?.[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5">{selectedCheck.srlHarness?.[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{nonQuarterly(selectedCheck.srlHarness)[i]?.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{nonQuarterly(selectedCheck.srlHarness)[i]?.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5">{nonQuarterly(selectedCheck.srlHarness)[i]?.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>

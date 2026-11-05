@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "../api/axios.jsx";
 
+// ignore old Weekly rows saved before the split
+const nonWeekly = (arr) => (arr || []).filter((r) => r?.frequently !== "Weekly");
+
 export default function QuarterlySpotCheckPrintView() {
     const navigate = useNavigate();
     const [spotChecks, setSpotChecks] = useState([]);
@@ -568,13 +571,6 @@ export default function QuarterlySpotCheckPrintView() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-gray-400 p-0.5">Weekly</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.month}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.whi}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.electrician}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.comment}</td>
-                                </tr>
-                                <tr>
                                     <td className="border border-gray-400 p-0.5">Quarterly</td>
                                     <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.month}</td>
                                     <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.quarterly?.whi}</td>
@@ -779,18 +775,16 @@ export default function QuarterlySpotCheckPrintView() {
                             </thead>
                             <tbody>
                                 {[
-                                    "Is rubber surface of safety ramp and handrail rubber grip properly glued. Also grip not hanging with handrail?",
-                                    "Side stability holder and intact with ramp also check all the welded joint found no crack or damage",
                                     "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
                                     "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
                                     "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
                                 ].map((text, i) => (
                                     <tr key={i}>
                                         <td className="border border-gray-400 p-0.5 text-[8px]">{text}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.frequently || ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 ">{selectedCheck.safetyRamp?.[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{nonWeekly(selectedCheck.safetyRamp)[i]?.frequently || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{nonWeekly(selectedCheck.safetyRamp)[i]?.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{nonWeekly(selectedCheck.safetyRamp)[i]?.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 ">{nonWeekly(selectedCheck.safetyRamp)[i]?.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>

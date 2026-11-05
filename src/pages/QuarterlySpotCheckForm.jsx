@@ -14,19 +14,12 @@ export default function QuarterlySpotCheckForm() {
         storageLocation: "",
         plantCode: "",
         stocks: [
-            { item: "Urea", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "EEDAP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(G)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(B)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "TSP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Z(T)", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "SSP 25 Kg", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "SSP 50 Kg", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "MOP", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
-            { item: "Zingro", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
+            { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
         ],
         elcb: {
-            weekly: { month: "", whi: "", electrician: "", comment: "" },
             quarterly: { month: "", whi: "", electrician: "", comment: "" },
         },
         earthingHealth: {
@@ -73,8 +66,6 @@ export default function QuarterlySpotCheckForm() {
             { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
         ],
         safetyRamp: [
-            { frequently: "Weekly", status: "", remarks: "" },
-            { frequently: "Weekly", status: "", remarks: "" },
             { frequently: "Monthly", status: "", remarks: "" },
             { frequently: "Monthly", status: "", remarks: "" },
             { frequently: "Monthly", status: "", remarks: "" },
@@ -133,7 +124,7 @@ export default function QuarterlySpotCheckForm() {
                     storageLocation: rec.storageLocation || "",
                     plantCode: rec.plantCode || "",
                     stocks: rec.stocks?.length ? rec.stocks : form.stocks,
-                    elcb: rec.elcb || form.elcb,
+                    elcb: { quarterly: rec.elcb?.quarterly || form.elcb.quarterly },
                     earthingHealth: rec.earthingHealth || form.earthingHealth,
                     stitchingMachine: rec.stitchingMachine || form.stitchingMachine,
                     weighingScale: rec.weighingScale || form.weighingScale,
@@ -165,7 +156,9 @@ export default function QuarterlySpotCheckForm() {
                               expiry: toDateInput(f.expiry),
                           }))
                         : form.fireExtinguishers,
-                    safetyRamp: rec.safetyRamp?.length ? rec.safetyRamp : form.safetyRamp,
+                    safetyRamp: rec.safetyRamp?.length
+                        ? rec.safetyRamp.filter((r) => r.frequently !== "Weekly")
+                        : form.safetyRamp,
                     srlHarness: rec.srlHarness?.length ? rec.srlHarness : form.srlHarness,
                     emergencyNumbers: rec.emergencyNumbers || form.emergencyNumbers,
                     medicine: rec.medicine || "",
@@ -288,9 +281,17 @@ export default function QuarterlySpotCheckForm() {
       return;
     }
 
+    // fully blank stock rows are skipped
+    const payload = {
+      ...form,
+      stocks: form.stocks.filter(
+        (st) => st.item || st.sitQty !== "" || st.physicalCount !== "" || st.looseProduct !== "" || st.remarks
+      ),
+    };
+
     await (isEditMode
-      ? API.put(`/api/quarterly-spot-check/${id}`, form, { headers: { Authorization: `Bearer ${token}` } })
-      : API.post("/api/quarterly-spot-check", form, { headers: { Authorization: `Bearer ${token}` } }));
+      ? API.put(`/api/quarterly-spot-check/${id}`, payload, { headers: { Authorization: `Bearer ${token}` } })
+      : API.post("/api/quarterly-spot-check", payload, { headers: { Authorization: `Bearer ${token}` } }));
 
     Swal.fire({
       icon: 'success',
@@ -470,7 +471,7 @@ export default function QuarterlySpotCheckForm() {
                             </tr>
                         </thead>
                         <tbody>
-                            {["Weekly", "Quarterly"].map((detail) => (
+                            {["Quarterly"].map((detail) => (
                                 <tr key={detail}>
                                     <td className="border px-2 py-1">{detail}</td>
                                     <td className="border px-2 py-1">
@@ -1168,8 +1169,6 @@ export default function QuarterlySpotCheckForm() {
                     </thead>
                     <tbody>
                         {[
-                            "Is rubber surface of safety ramp and handrail rubber grip properly glued. Also grip not hanging with handrail?",
-                            "Side stability holder and intact with ramp also check all the welded joint found no crack or damage",
                             "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
                             "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
                             "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
@@ -1177,7 +1176,7 @@ export default function QuarterlySpotCheckForm() {
                             <tr key={idx}>
                                 <td className="border px-2 py-1 text-sm">{text}</td>
                                 <td className="border px-2 py-1 text-center">
-                                    {idx < 2 ? "Weekly" : "Monthly"}
+                                    Monthly
                                 </td>
                                 <td className="border px-2 py-1 text-center">
                                     <input
