@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import API from "../api/axios.jsx";
+import { SAFETY_RAMP_ITEMS, SRL_ITEMS, defaultRows, withLabels } from "../utils/spotCheckItems";
 export default function WeeklySpotCheckForm() {
     const { user } = React.useContext(AuthContext);
     const { id } = useParams();
@@ -58,18 +59,8 @@ export default function WeeklySpotCheckForm() {
             { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
             { lastRefill: "", expiry: "", quantity: "", pressure: "", nozzle: "", seal: "" },
         ],
-        safetyRamp: [
-            { frequently: "Weekly", status: "", remarks: "" },
-            { frequently: "Weekly", status: "", remarks: "" },
-            { frequently: "Monthly", status: "", remarks: "" },
-            { frequently: "Monthly", status: "", remarks: "" },
-            { frequently: "Monthly", status: "", remarks: "" },
-        ],
-        srlHarness: [
-            { status: "", remarks: "", freq: "Monthly" },
-            { status: "", remarks: "", freq: "Monthly" },
-            { status: "", remarks: "", freq: "Monthly" },
-        ],
+        safetyRamp: defaultRows(SAFETY_RAMP_ITEMS),
+        srlHarness: defaultRows(SRL_ITEMS),
         emergencyNumbers: {
             fireBrigade: "",
             rescue: "",
@@ -148,9 +139,11 @@ export default function WeeklySpotCheckForm() {
                               expiry: toDateInput(f.expiry),
                           }))
                         : form.fireExtinguishers,
-                    safetyRamp: rec.safetyRamp?.length ? rec.safetyRamp : form.safetyRamp,
+                    safetyRamp: rec.safetyRamp?.length
+                        ? withLabels(rec.safetyRamp, "weekly", "safetyRamp")
+                        : form.safetyRamp,
                     srlHarness: rec.srlHarness?.length
-                        ? rec.srlHarness.filter((h) => h.freq !== "Quarterly")
+                        ? withLabels(rec.srlHarness, "weekly", "srlHarness")
                         : form.srlHarness,
                     emergencyNumbers: rec.emergencyNumbers || form.emergencyNumbers,
                     medicine: rec.medicine || "",
@@ -229,6 +222,95 @@ export default function WeeklySpotCheckForm() {
         setForm({ ...form, srlHarness: updated });
     };
 
+    // Safety Ramp / SRL rows: add, remove, edit
+    const addChecklistRow = (section) =>
+        setForm((f) => ({ ...f, [section]: [...f[section], { name: "", isCustom: true, status: "", remarks: "" }] }));
+    const removeChecklistRow = (section, idx) =>
+        setForm((f) => ({ ...f, [section]: f[section].filter((_, i) => i !== idx) }));
+    const updateChecklistRow = (section, idx, key, value) =>
+        setForm((f) => ({
+            ...f,
+            [section]: f[section].map((r, i) => (i === idx ? { ...r, [key]: value } : r)),
+        }));
+
+    const renderChecklist = (section, title, headLabel, placeholder) => (
+        <>
+            <h2 className="text-xl font-semibold mt-6 mb-2">{title}</h2>
+            <table className="w-full border border-gray-400">
+                <thead>
+                    <tr className="bg-gray-200">
+                        <th className="border px-2 py-1 text-left w-2/5">{headLabel}</th>
+                        <th className="border px-2 py-1">Poor</th>
+                        <th className="border px-2 py-1">Good</th>
+                        <th className="border px-2 py-1">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {form[section].map((row, idx) => (
+                        <tr key={idx}>
+                            <td className="border px-2 py-1 text-sm">
+                                {row.isCustom ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={row.name || ""}
+                                            onChange={(e) => updateChecklistRow(section, idx, "name", e.target.value)}
+                                            className="w-full border px-2 py-1"
+                                            placeholder={placeholder}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeChecklistRow(section, idx)}
+                                            className="text-red-600 text-xs font-semibold hover:underline"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ) : (
+                                    row.name
+                                )}
+                            </td>
+                            <td className="border px-2 py-1 text-center">
+                                <input
+                                    type="radio"
+                                    name={`${section}_${idx}`}
+                                    value="Poor"
+                                    checked={row.status === "Poor"}
+                                    onChange={() => updateChecklistRow(section, idx, "status", "Poor")}
+                                />
+                            </td>
+                            <td className="border px-2 py-1 text-center">
+                                <input
+                                    type="radio"
+                                    name={`${section}_${idx}`}
+                                    value="Good"
+                                    checked={row.status === "Good"}
+                                    onChange={() => updateChecklistRow(section, idx, "status", "Good")}
+                                />
+                            </td>
+                            <td className="border px-2 py-1">
+                                <input
+                                    type="text"
+                                    value={row.remarks || ""}
+                                    onChange={(e) => updateChecklistRow(section, idx, "remarks", e.target.value)}
+                                    className="w-full border px-2 py-1"
+                                    placeholder="Enter remarks"
+                                />
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <button
+                type="button"
+                onClick={() => addChecklistRow(section)}
+                className="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
+            >
+                + Add {title} Item
+            </button>
+        </>
+    );
+
     // Generic handleChange for nested objects
     const handleChange = (section, key, value, subKey = null) => {
         if (section === "stocks" || section === "fireExtinguishers" || section === "safetyRamp" || section === "srlHarness") {
@@ -275,8 +357,11 @@ export default function WeeklySpotCheckForm() {
     }
 
     // fully blank stock rows are skipped
+    const keepRow = (r) => !r.isCustom || r.name?.trim();
     const payload = {
       ...form,
+      safetyRamp: form.safetyRamp.filter(keepRow),
+      srlHarness: form.srlHarness.filter(keepRow),
       stocks: form.stocks.filter(
         (st) => st.item || st.sitQty !== "" || st.physicalCount !== "" || st.looseProduct !== "" || st.remarks
       ),
@@ -1066,126 +1151,10 @@ export default function WeeklySpotCheckForm() {
                 </div>
 
                 {/* Safety Ramp */}
-                <h2 className="text-xl font-semibold mt-6 mb-2">Safety Ramp</h2>
-                <table className="w-full border border-gray-400">
-                    <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border px-2 py-1 text-left w-2/5">Safety Ramp</th>
-                            <th className="border px-2 py-1">Frequently</th>
-                            <th className="border px-2 py-1">Poor</th>
-                            <th className="border px-2 py-1">Good</th>
-                            <th className="border px-2 py-1">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {[
-                            "Is rubber surface of safety ramp and handrail rubber grip properly glued. Also grip not hanging with handrail?",
-                            "Side stability holder and intact with ramp also check all the welded joint found no crack or damage",
-                            "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
-                            "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
-                            "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
-                        ].map((text, idx) => (
-                            <tr key={idx}>
-                                <td className="border px-2 py-1 text-sm">{text}</td>
-                                <td className="border px-2 py-1 text-center">
-                                    {idx < 2 ? "Weekly" : "Monthly"}
-                                </td>
-                                <td className="border px-2 py-1 text-center">
-                                    <input
-                                        type="radio"
-                                        name={`safetyRamp_${idx}`}
-                                        value="Poor"
-                                        checked={form.safetyRamp[idx]?.status === "Poor"}
-                                        onChange={() => handleSafetyRampChange(idx, "status", "Poor")}
-                                    />
-                                </td>
-                                <td className="border px-2 py-1 text-center">
-                                    <input
-                                        type="radio"
-                                        name={`safetyRamp_${idx}`}
-                                        value="Good"
-                                        checked={form.safetyRamp[idx]?.status === "Good"}
-                                        onChange={() => handleSafetyRampChange(idx, "status", "Good")}
-                                    />
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input
-                                        type="text"
-                                        value={form.safetyRamp[idx]?.remarks || ""}
-                                        onChange={(e) =>
-                                            handleSafetyRampChange(idx, "remarks", e.target.value)
-                                        }
-                                        className="w-full border px-2 py-1"
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {renderChecklist("safetyRamp", "Safety Ramp", "Safety Ramp", "Item name")}
 
                 {/* SRL Harness Section */}
-                <h2 className="text-xl font-semibold mt-6 mb-2">SRL / Harness</h2>
-                <table className="w-full border border-gray-400">
-                    <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border px-2 py-1 text-left w-2/5">SRL</th>
-                            <th className="border px-2 py-1">Frequently</th>
-                            <th className="border px-2 py-1">Poor</th>
-                            <th className="border px-2 py-1">Good</th>
-                            <th className="border px-2 py-1">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {[
-                            {
-                                text: "Lifeline lock up when received sharp jerks, also harness in good shape & has no damage in harness webbing & belts as well pulled stitches and broken fiber.",
-                                freq: "Monthly",
-                            },
-                            {
-                                text: "Is the snap hook operating freely, correctly, not bent, no crack, no damage sign. Buckles have no distortion, crack or break.",
-                                freq: "Monthly",
-                            },
-                            {
-                                text: "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
-                                freq: "Monthly",
-                            },
-                        ].map((item, idx) => (
-                            <tr key={idx}>
-                                <td className="border px-2 py-1">{item.text}</td>
-                                <td className="border px-2 py-1 text-center">{item.freq}</td>
-                                <td className="border px-2 py-1 text-center">
-                                    <input
-                                        type="radio"
-                                        name={`srl_${idx}`}
-                                        value="Poor"
-                                        checked={form.srlHarness[idx]?.status === "Poor"}
-                                        onChange={() => handleSrlHarnessChange(idx, "status", "Poor")}
-                                    />
-                                </td>
-                                <td className="border px-2 py-1 text-center">
-                                    <input
-                                        type="radio"
-                                        name={`srl_${idx}`}
-                                        value="Good"
-                                        checked={form.srlHarness[idx]?.status === "Good"}
-                                        onChange={() => handleSrlHarnessChange(idx, "status", "Good")}
-                                    />
-                                </td>
-                                <td className="border px-2 py-1">
-                                    <input
-                                        type="text"
-                                        value={form.srlHarness[idx]?.remarks || ""}
-                                        onChange={(e) =>
-                                            handleSrlHarnessChange(idx, "remarks", e.target.value)
-                                        }
-                                        className="w-full border px-1 py-0.5"
-                                        placeholder="Enter remarks"
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {renderChecklist("srlHarness", "SRL / Harness", "SRL", "Item name")}
 
                 {/* Emergency Numbers */}
                 <div>

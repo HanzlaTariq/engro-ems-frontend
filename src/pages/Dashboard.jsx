@@ -201,7 +201,9 @@ export default function Dashboard() {
       upsBattery: "No Data",
       fireExtinguishers: 0,
       safetyRamp: 0,
+      safetyRampTotal: 0,
       srlHarness: 0,
+      srlHarnessTotal: 0,
       medicine: "No Data",
       verifiedBy: "Not Verified"
     };
@@ -211,8 +213,10 @@ export default function Dashboard() {
       weighingScale: spotCheckData.weighingScale?.condition || "No Data",
       upsBattery: spotCheckData.upsBattery?.condition || "No Data",
       fireExtinguishers: spotCheckData.fireExtinguishers?.length || 0,
-      safetyRamp: spotCheckData.safetyRamp?.filter(r => r.good)?.length || 0,
+      safetyRamp: spotCheckData.safetyRamp?.filter(r => r.status === "Good")?.length || 0,
+      safetyRampTotal: spotCheckData.safetyRamp?.length || 0,
       srlHarness: spotCheckData.srlHarness?.filter(h => h.status === "Good")?.length || 0,
+      srlHarnessTotal: spotCheckData.srlHarness?.length || 0,
       medicine: spotCheckData.medicine || "No Data",
       verifiedBy: spotCheckData.verifiedBy || "Not Verified"
     };
@@ -825,8 +829,8 @@ export default function Dashboard() {
                   <div style={{ fontSize: "12px", color: engroColors.neutral }}>Check Date</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "16px", backgroundColor: engroColors.light, borderRadius: "8px" }}>
-                  <div style={{ fontSize: "20px", fontWeight: "700", color: dashboardData.quarterlyEquipmentStatus?.safetyRamp > 2 ? engroColors.success : engroColors.warning, marginBottom: "4px" }}>
-                    {dashboardData.quarterlyEquipmentStatus?.safetyRamp || 0}/5
+                  <div style={{ fontSize: "20px", fontWeight: "700", color: dashboardData.quarterlyEquipmentStatus?.safetyRamp > (dashboardData.quarterlyEquipmentStatus?.safetyRampTotal || 0) / 2 ? engroColors.success : engroColors.warning, marginBottom: "4px" }}>
+                    {dashboardData.quarterlyEquipmentStatus?.safetyRamp || 0}/{dashboardData.quarterlyEquipmentStatus?.safetyRampTotal || 0}
                   </div>
                   <div style={{ fontSize: "12px", color: engroColors.neutral }}>Safety Ramp (Good)</div>
                 </div>
@@ -839,9 +843,9 @@ export default function Dashboard() {
                 </h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: dashboardData.quarterlyEquipmentStatus?.srlHarness > 2 ? engroColors.success : engroColors.warning }}></div>
+                    <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: dashboardData.quarterlyEquipmentStatus?.srlHarness > (dashboardData.quarterlyEquipmentStatus?.srlHarnessTotal || 0) / 2 ? engroColors.success : engroColors.warning }}></div>
                     <span style={{ fontSize: "14px", color: engroColors.neutral }}>SRL Harness: </span>
-                    <span style={{ fontSize: "14px", fontWeight: "600", color: engroColors.dark }}>{dashboardData.quarterlyEquipmentStatus?.srlHarness || 0}/5 Good</span>
+                    <span style={{ fontSize: "14px", fontWeight: "600", color: engroColors.dark }}>{dashboardData.quarterlyEquipmentStatus?.srlHarness || 0}/{dashboardData.quarterlyEquipmentStatus?.srlHarnessTotal || 0} Good</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: dashboardData.quarterlyEquipmentStatus?.verifiedBy === "Verified" ? engroColors.success : engroColors.warning }}></div>

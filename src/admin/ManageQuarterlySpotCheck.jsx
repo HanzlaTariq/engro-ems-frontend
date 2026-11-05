@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { withLabels } from "../utils/spotCheckItems";
 import axios from "axios";
 import { AdminAuthContext } from "./context/AdminAuthContext";
 import Swal from 'sweetalert2';
@@ -13,7 +14,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 // ignore old Weekly rows saved before the split
-const nonWeekly = (arr) => (arr || []).filter((r) => r?.frequently !== "Weekly");
 
 export default function ManagequarterlySpotCheck() {
   const { admin, adminToken, loading: authLoading } = useContext(AdminAuthContext);
@@ -752,32 +752,26 @@ export default function ManagequarterlySpotCheck() {
                 {/* Safety Ramp */}
                 {selectedRecord.safetyRamp && selectedRecord.safetyRamp.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-lg text-gray-800 mb-2">🛡️ Safety Ramp ({nonWeekly(selectedRecord.safetyRamp).length})</h3>
+                    <h3 className="font-bold text-lg text-gray-800 mb-2">🛡️ Safety Ramp ({selectedRecord.safetyRamp.length})</h3>
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm border">
                         <thead className="bg-gray-100">
                           <tr>
                             <th className="py-2 px-4 border text-left">Safety Ramp Description</th>
-                            <th className="py-2 px-4 border">Frequency</th>
                             <th className="py-2 px-4 border">Status</th>
                             <th className="py-2 px-4 border">Remarks</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {[
-                            "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
-                            "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
-                            "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
-                          ].map((description, index) => (
+                          {withLabels(selectedRecord.safetyRamp, "quarterly", "safetyRamp").map((row, index) => (
                             <tr key={index}>
-                              <td className="py-2 px-4 border text-sm">{description}</td>
-                              <td className="py-2 px-4 border text-center">{nonWeekly(selectedRecord.safetyRamp)[index]?.frequently || "-"}</td>
+                              <td className="py-2 px-4 border text-sm">{row.name}</td>
                               <td className="py-2 px-4 border text-center">
-                                <span className={nonWeekly(selectedRecord.safetyRamp)[index]?.status === "Good" ? "text-green-600 font-semibold" : selectedRecord.srlHarness[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
-                                  {nonWeekly(selectedRecord.safetyRamp)[index]?.status || "-"}
+                                <span className={row.status === "Good" ? "text-green-600 font-semibold" : row.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
+                                  {row.status || "-"}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 border">{nonWeekly(selectedRecord.safetyRamp)[index]?.remarks || "-"}</td>
+                              <td className="py-2 px-4 border">{row.remarks || "-"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -795,43 +789,20 @@ export default function ManagequarterlySpotCheck() {
                         <thead className="bg-gray-100">
                           <tr>
                             <th className="py-2 px-4 border text-left">SRL Description</th>
-                            <th className="py-2 px-4 border">Frequency</th>
                             <th className="py-2 px-4 border">Status</th>
                             <th className="py-2 px-4 border">Remarks</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {[
-                            {
-                              text: "Lifeline lock up when received sharp jerks, also harness in good shape & has no damage in harness webbing & belts as well pulled stitches and broken fiber.",
-                              freq: "Monthly",
-                            },
-                            {
-                              text: "Is the snap hook operating freely, correctly, not bent, no crack, no damage sign. Buckles have no distortion, crack or break.",
-                              freq: "Monthly",
-                            },
-                            {
-                              text: "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
-                              freq: "Monthly",
-                            },
-                            {
-                              text: "All bolts of iron frame/anchorage with pillar/roof properly fixed. Welded joints have no cracks.",
-                              freq: "Quarterly",
-                            },
-                            {
-                              text: "Plumb used to bind iron cable with U-turn buckle not loose, no damage, no cracks on SRL unit.",
-                              freq: "Quarterly",
-                            },
-                          ].map((item, index) => (
+                          {withLabels(selectedRecord.srlHarness, "quarterly", "srlHarness").map((row, index) => (
                             <tr key={index}>
-                              <td className="py-2 px-4 border text-sm">{item.text}</td>
-                              <td className="py-2 px-4 border text-center">{item.freq}</td>
+                              <td className="py-2 px-4 border text-sm">{row.name}</td>
                               <td className="py-2 px-4 border text-center">
-                                <span className={selectedRecord.srlHarness[index]?.status === "Good" ? "text-green-600 font-semibold" : selectedRecord.srlHarness[index]?.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
-                                  {selectedRecord.srlHarness[index]?.status || "-"}
+                                <span className={row.status === "Good" ? "text-green-600 font-semibold" : row.status === "Poor" ? "text-red-600 font-semibold" : "text-gray-400"}>
+                                  {row.status || "-"}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 border">{selectedRecord.srlHarness[index]?.remarks || "-"}</td>
+                              <td className="py-2 px-4 border">{row.remarks || "-"}</td>
                             </tr>
                           ))}
                         </tbody>

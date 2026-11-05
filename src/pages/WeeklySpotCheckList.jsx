@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { withLabels } from "../utils/spotCheckItems";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios.jsx";
 // ignore old Quarterly rows saved before the split
-const nonQuarterly = (arr) => (arr || []).filter((r) => r?.freq !== "Quarterly");
 
 export default function WeeklySpotCheckPrintView() {
     const navigate = useNavigate();
@@ -764,26 +764,18 @@ export default function WeeklySpotCheckPrintView() {
                             <thead>
                                 <tr>
                                     <th className="border border-gray-400 p-0.5 text-left w-2/5">Safety Ramp Details</th>
-                                    <th className="border border-gray-400 p-0.5">Frequency</th>
                                     <th className="border border-gray-400 p-0.5">Poor</th>
                                     <th className="border border-gray-400 p-0.5">Good</th>
                                     <th className="border border-gray-400 p-0.5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {[
-                                    "Is rubber surface of safety ramp and handrail rubber grip properly glued. Also grip not hanging with handrail?",
-                                    "Side stability holder and intact with ramp also check all the welded joint found no crack or damage",
-                                    "All the nut bolt are properly tight and fitted. Iron strip beneath the safety ramp and handrail is properly fitted and welded with frame",
-                                    "Closely inspected the wooden plank from beneath and found no major crack also rubber surface cleaned with brush & water",
-                                    "Air pressure is good enough for easy movement. Also Tires, wheel axel and ball bearing are in working condition",
-                                ].map((text, i) => (
+                                {withLabels(selectedCheck.safetyRamp, "weekly", "safetyRamp").map((row, i) => (
                                     <tr key={i}>
-                                        <td className="border border-gray-400 p-0.5 text-[8px]">{text}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.frequently || ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{selectedCheck.safetyRamp?.[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 ">{selectedCheck.safetyRamp?.[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-[8px]">{row.name}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{row.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{row.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5">{row.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -797,27 +789,18 @@ export default function WeeklySpotCheckPrintView() {
                             <thead>
                                 <tr>
                                     <th className="border border-gray-400 p-0.5 text-left w-2/5">SRL / Harness Details</th>
-                                    <th className="border border-gray-400 p-0.5">Frequency</th>
                                     <th className="border border-gray-400 p-0.5">Poor</th>
                                     <th className="border border-gray-400 p-0.5">Good</th>
                                     <th className="border border-gray-400 p-0.5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {[
-                                    "Lifeline lock up when received sharp jerks, also harness in good shape & has no damage in harness webbing & belts as well pulled stitches and broken fiber.",
-                                    "Is the snap hook operating freely, correctly, not bent, no crack, no damage sign. Buckles have no distortion, crack or break.",
-                                    "Inspect the iron cable installed between pillars for cuts, corrosion, damage. Inspect device cable/rope for cuts, nicks, broken wires.",
-                                ].map((text, i) => ({
-                                    text,
-                                    freq: "Monthly"
-                                })).map((item, i) => (
+                                {withLabels(selectedCheck.srlHarness, "weekly", "srlHarness").map((row, i) => (
                                     <tr key={i}>
-                                        <td className="border border-gray-400 p-0.5 text-[8px]">{item.text}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{item.freq}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{nonQuarterly(selectedCheck.srlHarness)[i]?.status === "Poor" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5 text-center">{nonQuarterly(selectedCheck.srlHarness)[i]?.status === "Good" ? 'Yes' : ''}</td>
-                                        <td className="border border-gray-400 p-0.5">{nonQuarterly(selectedCheck.srlHarness)[i]?.remarks || ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-[8px]">{row.name}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{row.status === "Poor" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5 text-center">{row.status === "Good" ? 'Yes' : ''}</td>
+                                        <td className="border border-gray-400 p-0.5">{row.remarks || ''}</td>
                                     </tr>
                                 ))}
                             </tbody>
