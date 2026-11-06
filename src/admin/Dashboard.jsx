@@ -53,6 +53,22 @@ export default function Dashboard() {
     fetchOverview();
   }, []);
 
+  // Pending counts ko silently refresh rakhna (loading flicker ke bina)
+  useEffect(() => {
+    const id = setInterval(async () => {
+      try {
+        const token = sessionStorage.getItem("adminToken");
+        const res = await API.get("/api/dashboard-stats/overview", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOverview(res.data);
+      } catch (e) {
+        /* silent */
+      }
+    }, 30000);
+    return () => clearInterval(id);
+  }, []);
+
   const handleLogout = () => {
     sessionStorage.removeItem("adminToken");
     sessionStorage.removeItem("adminData");
@@ -203,15 +219,50 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Pending verifications banner */}
+          {/* Approval Required panel */}
           {!loading && pendingVerifications > 0 && (
-            <div className="mt-6 flex items-center gap-3 p-4 rounded-xl bg-orange-50 border border-orange-100">
-              <Hourglass className="w-5 h-5 text-orange-600 flex-shrink-0" />
-              <p className="text-sm text-orange-800">
-                <span className="font-semibold">{pendingVerifications}</span> record
-                {pendingVerifications === 1 ? "" : "s"} across all modules are still waiting for
-                DO verification.
-              </p>
+            <div className="mt-6 rounded-xl border-2 border-red-200 bg-red-50 overflow-hidden">
+              <div className="flex items-center gap-3 p-4 bg-red-100/70 border-b border-red-200">
+                <div className="relative flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-red-800">
+                    {pendingVerifications} new request{pendingVerifications === 1 ? "" : "s"} waiting for your approval
+                  </p>
+                  <p className="text-xs text-red-700">
+                    Warehouse managers ne ye records submit kiye hain — review karke Verify ya Revert karein.
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                {[
+                  { key: "attendance", name: "Attendance", path: "/admin/manage-attendance" },
+                  { key: "safetyTalk", name: "Safety Talk (Labour)", path: "/admin/manage-safety-talk" },
+                  { key: "safetyTalkTrucker", name: "Safety Talk (Trucker)", path: "/admin/manage-safety-talk-trucker" },
+                  { key: "emptyBag", name: "Empty Bag", path: "/admin/manage-empty-bags" },
+                  { key: "preStationary", name: "Pre-Stationary Records", path: "/admin/manage-pre-stationary-record" },
+                  { key: "weeklySpotCheck", name: "Weekly Spot Check", path: "/admin/weekly-reports" },
+                  { key: "quarterlySpotCheck", name: "Quarterly Spot Check", path: "/admin/quarterly-reports" },
+                ]
+                  .filter((m) => (overview?.[m.key]?.pending ?? 0) > 0)
+                  .map((m) => (
+                    <button
+                      key={m.key}
+                      onClick={() => navigate(m.path)}
+                      className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-white border border-red-100 hover:border-red-300 hover:shadow-sm transition-all text-left"
+                    >
+                      <span className="text-sm font-medium text-gray-800">{m.name}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="min-w-[24px] h-6 px-2 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                          {overview[m.key].pending}
+                        </span>
+                        <span className="text-xs font-semibold text-red-600">Review →</span>
+                      </span>
+                    </button>
+                  ))}
+              </div>
             </div>
           )}
 

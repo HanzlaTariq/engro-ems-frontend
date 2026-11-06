@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AdminAuthContext } from "../context/AdminAuthContext";
+import usePendingApprovals, { PENDING_ROUTE } from "./usePendingApprovals";
 import {
   LayoutDashboard,
   Package,
@@ -33,6 +34,25 @@ export default function Sidebar({
   const location = useLocation();
   const { admin } = useContext(AdminAuthContext);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { counts: pendingCounts, total: pendingTotal } = usePendingApprovals();
+  // path -> pending count (har module ka badge)
+  const pendingByPath = {};
+  Object.entries(PENDING_ROUTE).forEach(([key, path]) => {
+    pendingByPath[path] = pendingCounts[key] || 0;
+  });
+  const groupPending = (group) => group.children.reduce((sum, c) => sum + (pendingByPath[c.path] || 0), 0);
+
+  const Badge = ({ n, light }) =>
+    n > 0 ? (
+      <span
+        className={`ml-2 min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center flex-shrink-0 ${
+          light ? "bg-white text-red-600" : "bg-red-500 text-white animate-pulse"
+        }`}
+        title={`${n} approval pending`}
+      >
+        {n > 99 ? "99+" : n}
+      </span>
+    ) : null;
 
   const engroColors = {
     primary: "#00A859",
@@ -162,6 +182,10 @@ export default function Sidebar({
               {item.name}
             </span>
           )}
+          {showLabels && <Badge n={item.path === "/admin/dashboard" ? pendingTotal : pendingByPath[item.path]} light={active} />}
+          {!showLabels && (item.path === "/admin/dashboard" ? pendingTotal : pendingByPath[item.path]) > 0 && (
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+          )}
           {active && (
             <div
               className="absolute right-1.5 top-1/2 transform -translate-y-1/2 w-1 h-4 rounded-full"
@@ -190,7 +214,7 @@ export default function Sidebar({
             }
             toggleGroup(group.id);
           }}
-          className={`w-full flex items-center rounded-lg px-3 py-2.5 text-left transition-all duration-200 ${
+          className={`relative w-full flex items-center rounded-lg px-3 py-2.5 text-left transition-all duration-200 ${
             active ? "bg-green-50 text-green-800" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           }`}
         >
@@ -199,9 +223,13 @@ export default function Sidebar({
               active ? "text-green-700" : "text-gray-400"
             }`}
           />
+          {!showLabels && groupPending(group) > 0 && (
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+          )}
           {showLabels && (
             <>
               <span className="font-medium text-sm flex-1 truncate">{group.name}</span>
+              {!open && <Badge n={groupPending(group)} />}
               <ChevronDown
                 className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
                   open ? "rotate-180" : ""
@@ -237,7 +265,7 @@ export default function Sidebar({
         className={`fixed top-0 left-0 h-screen z-50
           ${isMobileOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0"}
           ${sidebarCollapsed && !isMobileOpen ? "lg:w-[72px]" : "lg:w-64"}
-          bg-white shadow-2xl border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col relative overflow-hidden`}
+          bg-white shadow-2xl border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col overflow-hidden`}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-[0.02] bg-gradient-to-br from-green-500 via-blue-500 to-purple-500"></div>
