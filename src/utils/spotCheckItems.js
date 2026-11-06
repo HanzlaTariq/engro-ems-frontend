@@ -48,3 +48,56 @@ export const withLabels = (rows, kind, section) =>
     ...r,
     name: r?.name || LEGACY_LABELS[kind][section][i] || `Item ${i + 1}`,
   }));
+
+// ---------------- ELCB (paper form: Detail | Month | WHI | Electrician | Remarks) ----------------
+export const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+export const QUARTERS = ["Q1 (Jan-Mar)", "Q2 (Apr-Jun)", "Q3 (Jul-Sep)", "Q4 (Oct-Dec)"];
+
+// Detail column ki 3 rows: Date / Month / Quarter
+export const ELCB_ROWS = [
+  { key: "dateRow", label: "Date", type: "date" },
+  { key: "monthRow", label: "Month", type: "month" },
+  { key: "quarterRow", label: "Quarter", type: "quarter" },
+];
+
+const emptyElcbRow = () => ({ value: "", month: "", whi: "", electrician: "", comment: "" });
+
+export const emptyElcb = () => ({
+  dateRow: emptyElcbRow(),
+  monthRow: emptyElcbRow(),
+  quarterRow: emptyElcbRow(),
+});
+
+// Saved record -> 3 rows. Purane records (elcb.weekly / elcb.quarterly) ko Date / Quarter row me dikhata hai.
+export const normalizeElcb = (elcb, kind) => {
+  const base = emptyElcb();
+  if (!elcb) return base;
+  const hasNew = ELCB_ROWS.some((r) => elcb[r.key]);
+  if (hasNew) {
+    ELCB_ROWS.forEach((r) => {
+      base[r.key] = { ...emptyElcbRow(), ...(elcb[r.key] || {}) };
+    });
+    return base;
+  }
+  const legacy = kind === "quarterly" ? elcb.quarterly : elcb.weekly;
+  if (legacy) {
+    const row = { ...emptyElcbRow(), month: legacy.month || "", whi: legacy.whi || "", electrician: legacy.electrician || "", comment: legacy.comment || "" };
+    base[kind === "quarterly" ? "quarterRow" : "dateRow"] = row;
+  }
+  return base;
+};
+
+// Detail cell ka text, e.g. "Date: 05-11-2026"
+export const elcbDetailText = (row, value) => {
+  if (!value) return `${row.label}:`;
+  if (row.type === "date") {
+    const [y, m, d] = String(value).split("-");
+    return y && m && d ? `${row.label}: ${d}-${m}-${y}` : `${row.label}: ${value}`;
+  }
+  return `${row.label}: ${value}`;
+};
+
+export const elcbIsFilled = (r) => !!(r && (r.value || r.month || r.whi || r.electrician || r.comment));

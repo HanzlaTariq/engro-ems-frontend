@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import Swal from "sweetalert2";
 import API from "../api/axios.jsx";
-import { SAFETY_RAMP_ITEMS, SRL_ITEMS, defaultRows, withLabels } from "../utils/spotCheckItems";
+import { SAFETY_RAMP_ITEMS, SRL_ITEMS, defaultRows, withLabels, ELCB_ROWS, MONTHS, QUARTERS, emptyElcb, normalizeElcb } from "../utils/spotCheckItems";
 export default function WeeklySpotCheckForm() {
     const { user } = React.useContext(AuthContext);
     const { id } = useParams();
@@ -20,9 +20,7 @@ export default function WeeklySpotCheckForm() {
             { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
             { item: "", sitQty: "", physicalCount: "", looseProduct: "", remarks: "" },
         ],
-        elcb: {
-            weekly: { month: "", whi: "", electrician: "", comment: "" },
-        },
+        elcb: emptyElcb(),
         stitchingMachine: {
             condition: "",
             conditionRemark: "",
@@ -108,7 +106,7 @@ export default function WeeklySpotCheckForm() {
                     storageLocation: rec.storageLocation || "",
                     plantCode: rec.plantCode || "",
                     stocks: rec.stocks?.length ? rec.stocks : form.stocks,
-                    elcb: { weekly: rec.elcb?.weekly || form.elcb.weekly },
+                    elcb: normalizeElcb(rec.elcb, "weekly"),
                     stitchingMachine: rec.stitchingMachine || form.stitchingMachine,
                     weighingScale: rec.weighingScale || form.weighingScale,
                     upsBattery: rec.upsBattery || form.upsBattery,
@@ -221,6 +219,10 @@ export default function WeeklySpotCheckForm() {
         updated[index][key] = value;
         setForm({ ...form, srlHarness: updated });
     };
+
+    // ELCB row update
+    const updateElcb = (rowKey, field, value) =>
+        setForm((f) => ({ ...f, elcb: { ...f.elcb, [rowKey]: { ...f.elcb[rowKey], [field]: value } } }));
 
     // Safety Ramp / SRL rows: add, remove, edit
     const addChecklistRow = (section) =>
@@ -538,36 +540,65 @@ export default function WeeklySpotCheckForm() {
                 {/* ELCB Section */}
                 <div>
                     <h2 className="text-lg font-semibold mb-2">ELCB</h2>
-                    <table className="w-full border">
+                    <div className="overflow-x-auto">
+                    <table className="w-full border min-w-[640px]">
                         <thead>
                             <tr className="bg-gray-100">
                                 <th className="border px-2 py-1">Detail</th>
                                 <th className="border px-2 py-1">Month</th>
                                 <th className="border px-2 py-1">WHI</th>
                                 <th className="border px-2 py-1">Electrician</th>
-                                <th className="border px-2 py-1">Comment</th>
+                                <th className="border px-2 py-1">Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {["Weekly"].map((detail) => (
-                                <tr key={detail}>
-                                    <td className="border px-2 py-1">{detail}</td>
+                            {ELCB_ROWS.map((row) => (
+                                <tr key={row.key}>
+                                    <td className="border px-2 py-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium whitespace-nowrap">{row.label}:</span>
+                                            {row.type === "date" && (
+                                                <input
+                                                    type="date"
+                                                    className="w-full border px-1"
+                                                    value={form.elcb[row.key]?.value || ""}
+                                                    onChange={(e) => updateElcb(row.key, "value", e.target.value)}
+                                                />
+                                            )}
+                                            {row.type === "month" && (
+                                                <select
+                                                    className="w-full border px-1"
+                                                    value={form.elcb[row.key]?.value || ""}
+                                                    onChange={(e) => updateElcb(row.key, "value", e.target.value)}
+                                                >
+                                                    <option value="">Select</option>
+                                                    {MONTHS.map((m) => (
+                                                        <option key={m} value={m}>{m}</option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                            {row.type === "quarter" && (
+                                                <select
+                                                    className="w-full border px-1"
+                                                    value={form.elcb[row.key]?.value || ""}
+                                                    onChange={(e) => updateElcb(row.key, "value", e.target.value)}
+                                                >
+                                                    <option value="">Select</option>
+                                                    {QUARTERS.map((q) => (
+                                                        <option key={q} value={q}>{q}</option>
+                                                    ))}
+                                                </select>
+                                            )}
+                                        </div>
+                                    </td>
                                     <td className="border px-2 py-1">
                                         <select
                                             className="w-full border px-1"
-                                            value={form.elcb[detail.toLowerCase()]?.month || ""}
-                                            onChange={(e) =>
-                                                handleChange("elcb", detail.toLowerCase(), {
-                                                    ...form.elcb[detail.toLowerCase()],
-                                                    month: e.target.value,
-                                                })
-                                            }
+                                            value={form.elcb[row.key]?.month || ""}
+                                            onChange={(e) => updateElcb(row.key, "month", e.target.value)}
                                         >
                                             <option value="">Select Month</option>
-                                            {[
-                                                "January", "February", "March", "April", "May", "June",
-                                                "July", "August", "September", "October", "November", "December"
-                                            ].map((m) => (
+                                            {MONTHS.map((m) => (
                                                 <option key={m} value={m}>{m}</option>
                                             ))}
                                         </select>
@@ -576,49 +607,32 @@ export default function WeeklySpotCheckForm() {
                                         <input
                                             type="text"
                                             className="w-full border px-1"
-                                            value={form.elcb[detail.toLowerCase()]?.whi || ""}
-                                            onChange={(e) =>
-                                                handleChange("elcb", detail.toLowerCase(), {
-                                                    ...form.elcb[detail.toLowerCase()],
-                                                    whi: e.target.value,
-                                                })
-                                            }
+                                            value={form.elcb[row.key]?.whi || ""}
+                                            onChange={(e) => updateElcb(row.key, "whi", e.target.value)}
                                         />
                                     </td>
                                     <td className="border px-2 py-1">
                                         <input
                                             type="text"
                                             className="w-full border px-1"
-                                            value={form.elcb[detail.toLowerCase()]?.electrician || ""}
-                                            onChange={(e) =>
-                                                handleChange("elcb", detail.toLowerCase(), {
-                                                    ...form.elcb[detail.toLowerCase()],
-                                                    electrician: e.target.value,
-                                                })
-                                            }
+                                            value={form.elcb[row.key]?.electrician || ""}
+                                            onChange={(e) => updateElcb(row.key, "electrician", e.target.value)}
                                         />
                                     </td>
                                     <td className="border px-2 py-1">
-                                        <select
+                                        <input
+                                            type="text"
                                             className="w-full border px-1"
-                                            value={form.elcb[detail.toLowerCase()]?.comment || ""}
-                                            onChange={(e) =>
-                                                handleChange("elcb", detail.toLowerCase(), {
-                                                    ...form.elcb[detail.toLowerCase()],
-                                                    comment: e.target.value,
-                                                })
-                                            }
-                                        >
-                                            <option value="">Select Comment</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Poor">Poor</option>
-                                            <option value="Needs Attention">Needs Attention</option>
-                                        </select>
+                                            placeholder="e.g. N/A"
+                                            value={form.elcb[row.key]?.comment || ""}
+                                            onChange={(e) => updateElcb(row.key, "comment", e.target.value)}
+                                        />
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
 
                 {/* Stitching Machine */}

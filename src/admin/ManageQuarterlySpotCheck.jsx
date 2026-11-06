@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { withLabels } from "../utils/spotCheckItems";
+import { withLabels, ELCB_ROWS, normalizeElcb, elcbDetailText, elcbIsFilled } from "../utils/spotCheckItems";
 import axios from "axios";
 import { AdminAuthContext } from "./context/AdminAuthContext";
 import Swal from 'sweetalert2';
@@ -398,8 +398,8 @@ export default function ManagequarterlySpotCheck() {
                     <div className="space-y-2 mb-6">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">ELCB Status:</span>
-                        <span className={`text-sm font-medium ${rec.elcb?.quarterly?.comment ? 'text-green-600' : 'text-gray-400'}`}>
-                          {rec.elcb?.quarterly?.comment || "Not checked"}
+                        <span className={`text-sm font-medium ${ELCB_ROWS.some((r) => elcbIsFilled(normalizeElcb(rec.elcb, "quarterly")[r.key])) ? 'text-green-600' : 'text-gray-400'}`}>
+                          {ELCB_ROWS.filter((r) => elcbIsFilled(normalizeElcb(rec.elcb, "quarterly")[r.key])).length ? `${ELCB_ROWS.filter((r) => elcbIsFilled(normalizeElcb(rec.elcb, "quarterly")[r.key])).length}/3 rows filled` : "Not checked"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -613,17 +613,35 @@ export default function ManagequarterlySpotCheck() {
                 )}
 
                 {/* ELCB Section */}
-                {selectedRecord.elcb?.quarterly && (
+                {selectedRecord.elcb && (
                   <div className="mb-6">
                     <h3 className="font-bold text-lg text-gray-800 mb-2">⚡ ELCB Check</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="border p-3 rounded">
-                        <h4 className="font-semibold">Quarterly</h4>
-                        <p><span className="font-medium">Month:</span> {selectedRecord.elcb.quarterly.month || "-"}</p>
-                        <p><span className="font-medium">WHI:</span> {selectedRecord.elcb.quarterly.whi || "-"}</p>
-                        <p><span className="font-medium">Electrician:</span> {selectedRecord.elcb.quarterly.electrician || "-"}</p>
-                        <p><span className="font-medium">Comment:</span> {selectedRecord.elcb.quarterly.comment || "-"}</p>
-                      </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-sm border">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="py-2 px-4 border text-left">Detail</th>
+                            <th className="py-2 px-4 border">Month</th>
+                            <th className="py-2 px-4 border">WHI</th>
+                            <th className="py-2 px-4 border">Electrician</th>
+                            <th className="py-2 px-4 border">Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ELCB_ROWS.map((row) => {
+                            const r = normalizeElcb(selectedRecord.elcb, "quarterly")[row.key];
+                            return (
+                              <tr key={row.key}>
+                                <td className="py-2 px-4 border font-medium">{elcbDetailText(row, r.value)}</td>
+                                <td className="py-2 px-4 border text-center">{r.month || "-"}</td>
+                                <td className="py-2 px-4 border text-center">{r.whi || "-"}</td>
+                                <td className="py-2 px-4 border text-center">{r.electrician || "-"}</td>
+                                <td className="py-2 px-4 border">{r.comment || "-"}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { withLabels } from "../utils/spotCheckItems";
+import { withLabels, ELCB_ROWS, normalizeElcb, elcbDetailText } from "../utils/spotCheckItems";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios.jsx";
@@ -547,7 +547,6 @@ export default function WeeklySpotCheckPrintView() {
                                 Weekly Spot Check {formatDate(selectedCheck.date).day}/{formatDate(selectedCheck.date).month}/{formatDate(selectedCheck.date).year.toString().slice(-2)}
                             </h1>
                         </div>
-                        <div className="text-right font-bold text-lg">05</div>
                     </div>
 
                     {/* Date Section */}
@@ -586,21 +585,26 @@ export default function WeeklySpotCheckPrintView() {
                         <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
                             <thead>
                                 <tr>
-                                    <th className="border border-gray-400 p-0.5 w-20">Detail</th>
+                                    <th className="border border-gray-400 p-0.5 w-24">Detail</th>
                                     <th className="border border-gray-400 p-0.5">Month</th>
                                     <th className="border border-gray-400 p-0.5">WHI</th>
                                     <th className="border border-gray-400 p-0.5">Electrician</th>
-                                    <th className="border border-gray-400 p-0.5">Comments</th>
+                                    <th className="border border-gray-400 p-0.5">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td className="border border-gray-400 p-0.5">Weekly</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.month}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.whi}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.electrician}</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.elcb?.weekly?.comment}</td>
-                                </tr>
+                                {ELCB_ROWS.map((row) => {
+                                    const r = normalizeElcb(selectedCheck.elcb, "weekly")[row.key];
+                                    return (
+                                        <tr key={row.key}>
+                                            <td className="border border-gray-400 p-0.5">{elcbDetailText(row, r.value)}</td>
+                                            <td className="border border-gray-400 p-0.5">{r.month}</td>
+                                            <td className="border border-gray-400 p-0.5">{r.whi}</td>
+                                            <td className="border border-gray-400 p-0.5">{r.electrician}</td>
+                                            <td className="border border-gray-400 p-0.5">{r.comment}</td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -730,28 +734,26 @@ export default function WeeklySpotCheckPrintView() {
                     <div className="mb-0.5">
                         <p className="font-bold mb-0.5 text-xs">Warehouse Area & Expiry:</p>
                         <table className="w-full border-collapse border border-gray-400" style={{ fontSize: '5.5px' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f3f4f6' }}>
+                                    <th className="border border-gray-400 p-0.5 text-left w-24">Detail</th>
+                                    <th className="border border-gray-400 p-0.5">Permanent</th>
+                                    <th className="border border-gray-400 p-0.5">Temporary</th>
+                                    <th className="border border-gray-400 p-0.5">Remarks</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <tr>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Permanent (sqft)</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.permanentSqft}</td>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.remarksSqft}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Area (sq ft)</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.permanentSqft || '-'}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.temporarySqft || '-'}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.remarksSqft || '-'}</td>
                                 </tr>
                                 <tr>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Temporary (sqft)</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.temporarySqft}</td>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Remarks</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.remarksSqft}</td>
-                                </tr>
-                                <tr>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Permanent Expiry</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.permanentExpiry}</td>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Temporary Expiry</td>
-                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouse?.temporaryExpiry}</td>
-                                </tr>
-                                <tr>
-                                    <td className="border border-gray-400 p-0.5 font-semibold">Expiry Remarks</td>
-                                    <td className="border border-gray-400 p-0.5" colSpan={3}>{selectedCheck.warehouse?.remarksExpiry}</td>
+                                    <td className="border border-gray-400 p-0.5 font-semibold">Expiry Date</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.warehouseAgreement?.permanentExpiry) || '-'}</td>
+                                    <td className="border border-gray-400 p-0.5">{formatDateDisplay(selectedCheck.warehouseAgreement?.temporaryExpiry) || '-'}</td>
+                                    <td className="border border-gray-400 p-0.5">{selectedCheck.warehouseAgreement?.remarksExpiry || '-'}</td>
                                 </tr>
                             </tbody>
                         </table>
