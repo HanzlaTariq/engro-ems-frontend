@@ -520,7 +520,7 @@ export default function ManagequarterlySpotCheck() {
                         <p className="text-amber-700 mb-4">
                           Please review all details below before verifying this spot check. Once verified, the record will be marked as completed.
                         </p>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-3">
                           <button
                             onClick={() => handleVerify(selectedRecord._id)}
                             disabled={verifyingId === selectedRecord._id}
@@ -885,19 +885,19 @@ export default function ManagequarterlySpotCheck() {
                 )}
 
                 {/* Action Buttons */}
-                <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex justify-between gap-3">
+                <div className="sticky bottom-0 bg-white border-t px-4 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:justify-between gap-2 sm:gap-3">
                   <button
                     onClick={closeDetails}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                    className="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Close
                   </button>
                   {isPendingVerification(selectedRecord) && (
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 sm:gap-3">
                       <button
                         onClick={() => handleVerify(selectedRecord._id)}
                         disabled={verifyingId === selectedRecord._id}
-                        className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="flex-1 sm:flex-none justify-center whitespace-nowrap px-3 sm:px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         {verifyingId === selectedRecord._id ? (
                           <>
@@ -913,7 +913,7 @@ export default function ManagequarterlySpotCheck() {
                       </button>
                       <button
                         onClick={() => handleDelete(selectedRecord._id)}
-                        className="px-6 py-3 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
+                        className="flex-1 sm:flex-none justify-center whitespace-nowrap px-3 sm:px-6 py-3 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2"
                       >
                         <TrashIcon className="w-4 h-4" />
                         Revert
