@@ -284,30 +284,30 @@ export default function ManagequarterlySpotCheck() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-colors ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             All Records ({records.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'pending' ? 'bg-amber-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'pending' ? 'bg-amber-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             <ClockIcon className="w-4 h-4" />
             Pending Verification ({records.filter(r => isPendingVerification(r)).length})
           </button>
           <button
             onClick={() => setActiveTab('verified')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'verified' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'verified' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             <CheckCircleIcon className="w-4 h-4" />
             Verified ({records.filter(r => (r.verifiedBy === "Verified" || r.status === "Verified")).length})
           </button>
           <button
             onClick={() => setActiveTab('reverted')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'reverted' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+            className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg font-medium transition-colors flex items-center gap-2 ${activeTab === 'reverted' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
           >
             <TrashIcon className="w-4 h-4" />
             Reverted ({records.filter(r => isReverted(r)).length})
